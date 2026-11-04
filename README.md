@@ -54,6 +54,7 @@ cd ui && npm run build && npm run check
 
 | Version | Highlights |
 |---|---|
+| **0.1.1** | Rebuilt with Ferrum-Frontend 80ff179: labels name their fields, and linked titles show their titles. |
 | **0.1.0** | Admissions, students and guardians, fees through ERP, a timetable without clashes, assessments and attendance (FERRUM-INDUSTRY-004). |
 
 ## License
