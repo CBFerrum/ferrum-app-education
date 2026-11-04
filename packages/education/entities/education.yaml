@@ -1,0 +1,277 @@
+- name: EducationSettings
+  label: Education Settings
+  kind: settings
+  module: education
+  description: "Where fees are invoiced from."
+  fields:
+    - {name: company, type: link, to: Company, required: true}
+  form:
+    - {label: Books, fields: [company]}
+
+- name: AcademicYear
+  label: Academic Year
+  label_plural: Academic Years
+  kind: master
+  module: education
+  title_field: year_name
+  fields:
+    - {name: year_name, type: data, required: true, unique: true, in_list: true}
+    - {name: starts_on, type: date, required: true, in_list: true}
+    - {name: ends_on, type: date, required: true, in_list: true}
+  list: {columns: [year_name, starts_on, ends_on], sort: starts_on desc}
+
+- name: Course
+  label: Course
+  label_plural: Courses
+  kind: master
+  module: education
+  title_field: course_name
+  fields:
+    - {name: course_name, type: data, required: true, in_list: true}
+    - {name: code, type: data, required: true, unique: true, in_list: true, max_length: 20}
+    - {name: description, type: text}
+  list: {columns: [code, course_name], sort: code asc}
+
+- name: Program
+  label: Program
+  label_plural: Programs
+  kind: master
+  module: education
+  title_field: program_name
+  fields:
+    - {name: program_name, type: data, required: true, in_list: true}
+    - {name: code, type: data, required: true, unique: true, in_list: true, max_length: 20}
+    - {name: courses, type: table, of: ProgramCourse}
+  list: {columns: [code, program_name], sort: program_name asc}
+
+- name: ProgramCourse
+  label: Course
+  kind: child
+  fields:
+    - {name: course, type: link, to: Course, required: true, in_list: true}
+    - {name: required, type: check, default: true, in_list: true}
+
+- name: StudentApplicant
+  label: Applicant
+  label_plural: Applicants
+  kind: master
+  module: education
+  title_field: applicant_name
+  search_fields: [email]
+  description: Someone applying to a program. Admitting them makes the student and their enrollment.
+  fields:
+    - {name: applicant_name, type: data, required: true, in_list: true}
+    - {name: email, type: email, in_list: true}
+    - {name: date_of_birth, type: date}
+    - {name: program, type: link, to: Program, required: true, in_list: true, in_filter: true}
+    - {name: academic_year, type: link, to: AcademicYear, required: true, in_list: true, in_filter: true}
+    - {name: guardian_name, type: data}
+    - {name: guardian_email, type: email}
+    - {name: guardian_phone, type: phone}
+    - {name: status, type: select, options: [Applied, Approved, Rejected, Admitted], default: Applied, read_only: true, no_copy: true, in_list: true, in_filter: true}
+    - {name: student, type: link, to: Student, read_only: true, no_copy: true}
+    - {name: notes, type: text}
+  actions:
+    - {name: approve, label: Approve, permission: write, condition: "doc.status == 'Applied'"}
+    - {name: reject, label: Reject, permission: write, condition: "doc.status == 'Applied' || doc.status == 'Approved'"}
+    - {name: admit, label: Admit, permission: write, condition: "doc.status == 'Approved'"}
+  numbering: {template: "APP-{YYYY}-{seq:5}"}
+  list: {columns: [number, applicant_name, program, academic_year, status], sort: created_at desc}
+
+- name: Student
+  label: Student
+  label_plural: Students
+  kind: master
+  module: education
+  title_field: student_name
+  search_fields: [email]
+  fields:
+    - {name: student_name, type: data, required: true, in_list: true}
+    - {name: email, type: email, in_list: true}
+    - {name: date_of_birth, type: date}
+    - {name: status, type: select, options: [Active, Graduated, Left], default: Active, in_list: true, in_filter: true}
+    - {name: customer, type: link, to: Customer, description: "Who fee invoices go to; made from the first guardian, or the student, when empty"}
+    - {name: guardians, type: table, of: Guardian}
+  numbering: {template: "STU-{YYYY}-{seq:5}"}
+  list: {columns: [number, student_name, email, status], sort: student_name asc}
+
+- name: Guardian
+  label: Guardian
+  kind: child
+  fields:
+    - {name: guardian_name, type: data, required: true, in_list: true}
+    - {name: relation, type: select, options: [Mother, Father, Guardian, Other], default: Guardian, in_list: true}
+    - {name: email, type: email, in_list: true}
+    - {name: phone, type: phone, in_list: true}
+
+- name: ProgramEnrollment
+  label: Enrollment
+  label_plural: Enrollments
+  kind: master
+  module: education
+  title_field: student
+  fields:
+    - {name: student, type: link, to: Student, required: true, in_list: true, in_filter: true}
+    - {name: program, type: link, to: Program, required: true, in_list: true, in_filter: true}
+    - {name: academic_year, type: link, to: AcademicYear, required: true, in_list: true, in_filter: true}
+    - {name: enrolled_on, type: date, required: true, in_list: true}
+  list: {columns: [student, program, academic_year, enrolled_on], sort: enrolled_on desc}
+
+- name: FeeStructure
+  label: Fee Structure
+  label_plural: Fee Structures
+  kind: master
+  module: education
+  title_field: structure_name
+  fields:
+    - {name: structure_name, type: data, required: true, in_list: true}
+    - {name: program, type: link, to: Program, required: true, in_list: true, in_filter: true}
+    - {name: academic_year, type: link, to: AcademicYear, required: true, in_list: true}
+    - {name: components, type: table, of: FeeComponent}
+    - {name: total, type: currency, read_only: true, in_list: true}
+  list: {columns: [structure_name, program, academic_year, total], sort: structure_name asc}
+
+- name: FeeComponent
+  label: Component
+  kind: child
+  fields:
+    - {name: component, type: data, required: true, in_list: true}
+    - {name: item, type: link, to: Item, required: true, in_list: true}
+    - {name: amount, type: currency, required: true, in_list: true}
+
+- name: Fees
+  label: Fees
+  label_plural: Fees
+  kind: master
+  module: education
+  title_field: student
+  description: What one student owes for a fee structure, invoiced through ERP; paid once its invoice is.
+  fields:
+    - {name: student, type: link, to: Student, required: true, in_list: true, in_filter: true}
+    - {name: fee_structure, type: link, to: FeeStructure, required: true, in_list: true}
+    - {name: due_on, type: date, required: true, in_list: true}
+    - {name: amount, type: currency, read_only: true, in_list: true}
+    - {name: status, type: select, options: [Draft, Invoiced, Paid, Cancelled], default: Draft, read_only: true, no_copy: true, in_list: true, in_filter: true}
+    - {name: sales_invoice, type: link, to: SalesInvoice, read_only: true, no_copy: true}
+  actions:
+    - {name: make_invoice, label: Invoice It, permission: write, condition: "doc.status == 'Draft'"}
+  numbering: {template: "FEE-{YYYY}-{seq:5}"}
+  list: {columns: [number, student, fee_structure, due_on, amount, status], sort: due_on desc}
+
+- name: Instructor
+  label: Instructor
+  label_plural: Instructors
+  kind: master
+  module: education
+  title_field: instructor_name
+  fields:
+    - {name: instructor_name, type: data, required: true, in_list: true}
+    - {name: email, type: email, in_list: true}
+  list: {columns: [instructor_name, email], sort: instructor_name asc}
+
+- name: Classroom
+  label: Room
+  label_plural: Rooms
+  kind: master
+  module: education
+  title_field: room_name
+  fields:
+    - {name: room_name, type: data, required: true, unique: true, in_list: true}
+    - {name: seats, type: int, default: 30, min: 1, in_list: true}
+  list: {columns: [room_name, seats], sort: room_name asc}
+
+- name: StudentGroup
+  label: Student Group
+  label_plural: Student Groups
+  kind: master
+  module: education
+  title_field: group_name
+  fields:
+    - {name: group_name, type: data, required: true, in_list: true}
+    - {name: program, type: link, to: Program, required: true, in_list: true, in_filter: true}
+    - {name: academic_year, type: link, to: AcademicYear, required: true, in_list: true}
+    - {name: students, type: table, of: GroupStudent}
+  list: {columns: [group_name, program, academic_year], sort: group_name asc}
+
+- name: GroupStudent
+  label: Student
+  kind: child
+  fields:
+    - {name: student, type: link, to: Student, required: true, in_list: true}
+
+- name: CourseSchedule
+  label: Class
+  label_plural: Timetable
+  kind: master
+  module: education
+  title_field: course
+  description: One class in the timetable. No room, instructor or group is in two classes at once.
+  fields:
+    - {name: student_group, type: link, to: StudentGroup, required: true, in_list: true, in_filter: true}
+    - {name: course, type: link, to: Course, required: true, in_list: true, in_filter: true}
+    - {name: instructor, type: link, to: Instructor, required: true, in_list: true, in_filter: true}
+    - {name: room, type: link, to: Classroom, required: true, in_list: true, in_filter: true}
+    - {name: date, type: date, required: true, in_list: true, in_filter: true}
+    - {name: from_time, type: data, required: true, in_list: true, max_length: 5, description: "HH:MM"}
+    - {name: to_time, type: data, required: true, in_list: true, max_length: 5, description: "HH:MM"}
+  list: {columns: [date, from_time, to_time, course, student_group, instructor, room], sort: date desc}
+
+- name: StudentAttendance
+  label: Attendance
+  label_plural: Attendance
+  kind: master
+  module: education
+  title_field: student
+  fields:
+    - {name: course_schedule, type: link, to: CourseSchedule, required: true, in_list: true, in_filter: true}
+    - {name: student, type: link, to: Student, required: true, in_list: true, in_filter: true}
+    - {name: status, type: select, options: [Present, Absent, Late, Excused], default: Present, required: true, in_list: true, in_filter: true}
+  list: {columns: [course_schedule, student, status], sort: created_at desc}
+
+- name: GradingScale
+  label: Grading Scale
+  label_plural: Grading Scales
+  kind: master
+  module: education
+  title_field: scale_name
+  fields:
+    - {name: scale_name, type: data, required: true, in_list: true}
+    - {name: grades, type: table, of: GradeBand}
+  list: {columns: [scale_name], sort: scale_name asc}
+
+- name: GradeBand
+  label: Grade
+  kind: child
+  fields:
+    - {name: grade, type: data, required: true, in_list: true}
+    - {name: from_percent, type: percent, required: true, in_list: true, description: "The lowest percentage that earns it"}
+
+- name: AssessmentPlan
+  label: Assessment
+  label_plural: Assessments
+  kind: master
+  module: education
+  title_field: assessment_name
+  fields:
+    - {name: assessment_name, type: data, required: true, in_list: true}
+    - {name: student_group, type: link, to: StudentGroup, required: true, in_list: true, in_filter: true}
+    - {name: course, type: link, to: Course, required: true, in_list: true}
+    - {name: date, type: date, required: true, in_list: true}
+    - {name: maximum_score, type: decimal, required: true, in_list: true}
+    - {name: grading_scale, type: link, to: GradingScale, required: true}
+  list: {columns: [assessment_name, student_group, course, date, maximum_score], sort: date desc}
+
+- name: AssessmentResult
+  label: Result
+  label_plural: Results
+  kind: master
+  module: education
+  title_field: student
+  fields:
+    - {name: assessment, type: link, to: AssessmentPlan, required: true, in_list: true, in_filter: true}
+    - {name: student, type: link, to: Student, required: true, in_list: true, in_filter: true}
+    - {name: score, type: decimal, required: true, in_list: true}
+    - {name: percent, type: percent, read_only: true, in_list: true}
+    - {name: grade, type: data, read_only: true, in_list: true}
+    - {name: comment, type: text}
+  list: {columns: [assessment, student, score, percent, grade], sort: created_at desc}

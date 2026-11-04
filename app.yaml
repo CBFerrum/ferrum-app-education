@@ -1,0 +1,32 @@
+id: education
+name: Education
+version: 0.1.0
+publisher: cbferrum
+summary: "A school's office: admissions, students and guardians, fees through ERP, a timetable without clashes, assessments and attendance"
+description: README.md
+categories: [education, industry]
+license: AGPL-3.0-only
+homepage: https://github.com/CBFerrum/ferrum-app-education
+support: https://github.com/CBFerrum/ferrum-app-education/issues
+runtime: native
+platform: ">=0.3.2, <0.4"
+# Records of ERP (customers, items, invoices): installing it installs ERP.
+requires: {erp: ">=0.1"}
+packages: [education]
+uninstall: ask
+# Its own interface at /school/: today's classes, what waits on the office, and the records.
+ui:
+  dist: ui/dist
+contributes:
+  shell.app:
+    - id: education
+      route: school
+      title: School
+      description: Classes, admissions, fees and results
+      icon: graduation-cap
+      color: "#1d4ed8"
+      roles: [Education Manager, Teacher, Admissions Officer]
+  shell.open:
+    - {id: education, package: education, path: "school/e/{entity}/{id}", list: "school/e/{entity}"}
+  shell.create:
+    - {id: applicant, label: Applicant, path: school/e/StudentApplicant/new, entity: StudentApplicant}
