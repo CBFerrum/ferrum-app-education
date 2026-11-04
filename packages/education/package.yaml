@@ -1,0 +1,66 @@
+package: education
+version: 0.1.0
+label: Education
+description: "A school's office: admissions, students and guardians, programs and courses, fees through ERP, a timetable without clashes, assessments and attendance"
+depends: [core, selling, accounting]
+
+modules:
+  - name: education
+    label: Education
+    icon: graduation-cap
+    order: 50
+    items: [Student, StudentApplicant, ProgramEnrollment, Fees, CourseSchedule, StudentAttendance, AssessmentPlan, AssessmentResult,
+            StudentGroup, Program, Course, Instructor, Classroom, FeeStructure, GradingScale, AcademicYear, EducationSettings]
+
+# What a personal-data request exports and erases (the person's email): names and contacts; marks,
+# fees and attendance stay, as the school's records need them.
+personal_data:
+  - {entity: StudentApplicant, match: email, erase: [applicant_name, email, date_of_birth, guardian_name, guardian_email, guardian_phone, notes]}
+  - {entity: Student, match: email, erase: [student_name, email, date_of_birth]}
+
+roles:
+  - name: Education Manager
+    description: Runs the school's office — programs, admissions, fees, the timetable and assessments.
+    permissions:
+      - {entity: EducationSettings, read: true, write: true, create: true}
+      - {entity: AcademicYear, read: true, write: true, create: true}
+      - {entity: Course, read: true, write: true, create: true, delete: true}
+      - {entity: Program, read: true, write: true, create: true, delete: true}
+      - {entity: StudentApplicant, read: true, write: true, create: true, export: true}
+      - {entity: Student, read: true, write: true, create: true, export: true, import: true}
+      - {entity: ProgramEnrollment, read: true, write: true, create: true}
+      - {entity: FeeStructure, read: true, write: true, create: true}
+      - {entity: Fees, read: true, write: true, create: true, export: true}
+      - {entity: Instructor, read: true, write: true, create: true}
+      - {entity: Classroom, read: true, write: true, create: true}
+      - {entity: StudentGroup, read: true, write: true, create: true}
+      - {entity: CourseSchedule, read: true, write: true, create: true, delete: true}
+      - {entity: StudentAttendance, read: true, write: true, create: true}
+      - {entity: GradingScale, read: true, write: true, create: true}
+      - {entity: AssessmentPlan, read: true, write: true, create: true}
+      - {entity: AssessmentResult, read: true, write: true, create: true, export: true}
+      - {entity: Customer, read: true, write: true, create: true}
+      - {entity: Item, read: true}
+      - {entity: Company, read: true}
+      - {entity: SalesInvoice, read: true, create: true}
+  - name: Teacher
+    description: Sees the timetable and their groups, takes attendance and enters results.
+    permissions:
+      - {entity: Student, read: true}
+      - {entity: StudentGroup, read: true}
+      - {entity: Course, read: true}
+      - {entity: Instructor, read: true}
+      - {entity: Classroom, read: true}
+      - {entity: CourseSchedule, read: true}
+      - {entity: StudentAttendance, read: true, write: true, create: true}
+      - {entity: GradingScale, read: true}
+      - {entity: AssessmentPlan, read: true}
+      - {entity: AssessmentResult, read: true, write: true, create: true}
+  - name: Admissions Officer
+    description: Takes applications and approves, rejects or admits them.
+    permissions:
+      - {entity: Program, read: true}
+      - {entity: AcademicYear, read: true}
+      - {entity: StudentApplicant, read: true, write: true, create: true}
+      - {entity: Student, read: true}
+      - {entity: ProgramEnrollment, read: true}
