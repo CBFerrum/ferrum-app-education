@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+Personal-data requests list the student, student applicant records holding the person's name apart, for an administrator to judge (never erased for the name alone) (Ferrum's FERRUM-PRIVACY-002).
+
 ## 0.1.2
 
 Rebuilt with Ferrum-Frontend daeadda: after an action runs, a record page shows what the action said it did rather than only that it is done.
