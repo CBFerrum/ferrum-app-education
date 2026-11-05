@@ -15,8 +15,8 @@ modules:
 # What a personal-data request exports and erases (the person's email): names and contacts; marks,
 # fees and attendance stay, as the school's records need them.
 personal_data:
-  - {entity: StudentApplicant, match: email, erase: [applicant_name, email, date_of_birth, guardian_name, guardian_email, guardian_phone, notes]}
-  - {entity: Student, match: email, erase: [student_name, email, date_of_birth]}
+  - {entity: StudentApplicant, match: email, name: applicant_name, erase: [applicant_name, email, date_of_birth, guardian_name, guardian_email, guardian_phone, notes]}
+  - {entity: Student, match: email, name: student_name, erase: [student_name, email, date_of_birth]}
 
 roles:
   - name: Education Manager
