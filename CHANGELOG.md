@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5
+
+An applicant's Reject asks for the reason it keeps in their notes: it read one and never asked, so from the applicant's page it was never kept.
+
 ## 0.1.4
 
 Rebuilt with Ferrum-Frontend 00dea07: in a workflow state that names what may change, the other fields show read-only, and the fields the state needs show required.
