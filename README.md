@@ -24,7 +24,8 @@ A school's office for [Ferrum](https://github.com/CBFerrum/Ferrum):
 - **A timetable without clashes.** No room, instructor or student group is in two classes at once.
   Back to back is fine, and times are kept as HH:MM.
 - **Groups** hold students enrolled in their program and year, each once. **Attendance** is taken only
-  for a class's own students, once each.
+  for a class's own students, once each, on the class's roll call: its group's students, present
+  unless marked otherwise, saved at once.
 - **Assessments** turn a score within the maximum into a percentage and a grade: the highest band
   of the scale the percentage reaches. Each student has one result per assessment, regraded when the
   score is corrected.
@@ -54,6 +55,7 @@ cd ui && npm run build && npm run check
 
 | Version | Highlights |
 |---|---|
+| **0.2.0** | What walking a school day found: a class's roll call; today's classes named and on the workspace's day; counts beyond 200; an empty office says where to start; a score's limit written plainly. |
 | **0.1.8** | Rebuilt with Ferrum-Frontend a76295e: times on a person's own clock when they chose one. |
 | **0.1.7** | Rebuilt with Ferrum-Frontend 24c3951: times on the workspace's clock; drafts headed as drafts. |
 | **0.1.6** | Rebuilt with Ferrum-Frontend bb60115: empty numbers read as the server reads them; settings open as their record. |

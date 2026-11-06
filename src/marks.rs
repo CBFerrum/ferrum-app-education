@@ -37,7 +37,7 @@ impl DocHook for ResultHook {
         let (max, scale) = row.ok_or_else(|| Error::field("assessment", "is not an assessment here"))?;
         let score = d(doc, "score");
         if score < Decimal::ZERO || score > max {
-            return Err(Error::field("score", format!("is between 0 and the assessment's maximum, {max}")));
+            return Err(Error::field("score", format!("must be between 0 and the assessment's maximum, {}", max.normalize())));
         }
         let percent = if max > Decimal::ZERO { round(score * Decimal::from(100) / max, 2) } else { Decimal::ZERO };
         let bands: Vec<(String, Decimal)> = sqlx::query_as("select grade, from_percent from e_grading_scale__grades where tenant_id = $1 and parent_id = $2")
