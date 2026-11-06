@@ -73,7 +73,12 @@
     - {name: notes, type: text}
   actions:
     - {name: approve, label: Approve, permission: write, condition: "doc.status == 'Applied'"}
-    - {name: reject, label: Reject, permission: write, condition: "doc.status == 'Applied' || doc.status == 'Approved'"}
+    - name: reject
+      label: Reject
+      permission: write
+      condition: "doc.status == 'Applied' || doc.status == 'Approved'"
+      params:
+        - {name: reason, type: text, label: Reason, description: "Kept in the applicant's notes"}
     - {name: admit, label: Admit, permission: write, condition: "doc.status == 'Approved'"}
   numbering: {template: "APP-{YYYY}-{seq:5}"}
   list: {columns: [number, applicant_name, program, academic_year, status], sort: created_at desc}
