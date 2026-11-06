@@ -1,5 +1,5 @@
-// Education's own interface at /school/: today's classes, applicants waiting, fees owed, with every
-// record in the records frame's lists and forms.
+// Education's own interface at /school/: today's classes, applicants waiting, fees owed, a class's
+// roll call, with every record in the records frame's lists and forms.
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode, useEffect } from "react";
@@ -46,6 +46,7 @@ const router = createBrowserRouter(
       errorElement: <RouteError />,
       children: [
         { index: true, lazy: () => import("./Home").then((m) => ({ Component: m.Home })) },
+        { path: "class/:id", lazy: () => import("./Roll").then((m) => ({ Component: m.Roll })) },
         { path: "e/:entity", lazy: page("ListView") },
         { path: "e/:entity/:id", lazy: page("FormView") },
         { path: "r/:name", lazy: page("ReportView") },

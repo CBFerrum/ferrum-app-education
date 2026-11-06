@@ -1,8 +1,28 @@
 import { describe, expect, it } from "vitest";
-import { todayIso } from "./Home";
+import { classLine } from "./Home";
+import { rollChanges } from "./Roll";
 
-describe("today", () => {
-  it("is the local date, zero-padded", () => {
-    expect(todayIso(new Date(2026, 0, 5, 23, 30))).toBe("2026-01-05");
+describe("the school office", () => {
+  it("names a class by its time, course, group, room and instructor", () => {
+    expect(classLine({ id: "c", from_time: "09:00", to_time: "10:00", _titles: { course: "Mathematics", student_group: "6A", room: "Room 101", instructor: "Mr Weiss" } })).toBe(
+      "09:00 to 10:00 · Mathematics · 6A · Room 101 · Mr Weiss",
+    );
+    expect(classLine({ id: "c", from_time: "09:00", to_time: "10:00" })).toBe("09:00 to 10:00");
+  });
+
+  it("saves a roll call's new and changed marks, and leaves the rest", () => {
+    const kept = new Map([
+      ["lea", { id: "a1", status: "Present" }],
+      ["tom", { id: "a2", status: "Present" }],
+    ]);
+    const chosen = new Map([
+      ["tom", "Late"],
+      ["ana", "Absent"],
+    ]);
+    expect(rollChanges(["lea", "tom", "ana", "ben"], kept, chosen)).toEqual([
+      { student: "tom", id: "a2", status: "Late" },
+      { student: "ana", id: undefined, status: "Absent" },
+      { student: "ben", id: undefined, status: "Present" },
+    ]);
   });
 });

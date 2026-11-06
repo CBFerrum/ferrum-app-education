@@ -265,7 +265,7 @@ async fn scenario() {
     refused(
         t.k.insert(&teacher, "AssessmentResult", obj(json!({"assessment": midterm.to_string(), "student": ana.to_string(), "score": "60"}))).await,
         "invalid",
-        "maximum, 50",
+        "must be between 0 and the assessment's maximum, 50",
     );
     let result = t.insert(&teacher, "AssessmentResult", json!({"assessment": midterm.to_string(), "student": ana.to_string(), "score": "43"})).await;
     assert_eq!((dec(&result["percent"]), result["grade"].as_str()), (86.0, Some("A")));

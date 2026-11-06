@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0
+
+What walking a school day through the pages found:
+- Attendance was one record per student, made one at a time. Each class now has a roll call, at /school/class/{class}, opened from today's classes. It lists the class's group, each student present unless marked otherwise, and saves the new and changed marks at once.
+- Today's classes were listed by their times alone. Each now shows its course, group, room and instructor.
+- Today was the browser's day, not the workspace's.
+- The counts of applicants waiting and fees unpaid stopped at 200. They are now counted.
+- An office with nothing set up showed empty lists. It now says to set the company, then a year and a program.
+- A score over the maximum was refused with "is between 0 and the assessment's maximum, 50.000000000". It now reads "must be between 0 and the assessment's maximum, 50".
+
 ## 0.1.8
 
 Rebuilt with Ferrum-Frontend a76295e: its pages show times on a person's own clock when they chose one on their Account page, while today and due dates stay on the workspace's day.
