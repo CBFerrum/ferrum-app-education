@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.6
+
+Rebuilt with Ferrum-Frontend bb60115: a record page reads an empty number or check as the server does, so an action whose condition needs one shows, and a workspace's settings open as their one record.
+
 ## 0.1.5
 
 An applicant's Reject asks for the reason it keeps in their notes: it read one and never asked, so from the applicant's page it was never kept.
