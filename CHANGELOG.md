@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+Rebuilt with Ferrum-Frontend 922fcfb: an action's dialog says every refusal, the errors on what the action made (another record's rows) among them, and an action with parameters and a confirmation asks once.
+
 ## 0.2.0
 
 What walking a school day through the pages found:

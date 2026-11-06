@@ -55,6 +55,7 @@ cd ui && npm run build && npm run check
 
 | Version | Highlights |
 |---|---|
+| **0.2.1** | Rebuilt with Ferrum-Frontend 922fcfb: action dialogs say every refusal and ask once. |
 | **0.2.0** | What walking a school day found: a class's roll call; today's classes named and on the workspace's day; counts beyond 200; an empty office says where to start; a score's limit written plainly. |
 | **0.1.8** | Rebuilt with Ferrum-Frontend a76295e: times on a person's own clock when they chose one. |
 | **0.1.7** | Rebuilt with Ferrum-Frontend 24c3951: times on the workspace's clock; drafts headed as drafts. |
