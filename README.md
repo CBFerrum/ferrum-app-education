@@ -54,6 +54,7 @@ cd ui && npm run build && npm run check
 
 | Version | Highlights |
 |---|---|
+| **0.1.5** | Reject asks for the reason it keeps. |
 | **0.1.4** | Rebuilt with Ferrum-Frontend 00dea07: a workflow state's kept fields are read-only, its needed ones required. |
 | **0.1.3** | Personal-data requests list the student, student applicant records holding the person's name apart, for an administrator to judge (never erased for the name … |
 | **0.1.2** | Rebuilt with Ferrum-Frontend daeadda: actions say what they did. |

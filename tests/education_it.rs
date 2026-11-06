@@ -136,6 +136,9 @@ async fn scenario() {
     let student = t.get("Student", ana).await;
     assert_eq!((student["student_name"].as_str(), student["guardians"][0]["guardian_name"].as_str()), (Some("Ana Rao"), Some("Mira Rao")));
     assert_eq!(t.find_one("ProgramEnrollment", json!({"student": ana.to_string()})).await["program"].as_str(), Some(grade5.to_string().as_str()));
+    // The applicant's page asks for the reason Reject keeps.
+    let reject = officer.schema.entity("StudentApplicant").unwrap().def.actions.iter().find(|a| a.name == "reject").unwrap().clone();
+    assert_eq!(reject.params.iter().map(|p| p.name.as_str()).collect::<Vec<_>>(), ["reason"]);
     t.k.run_action(&officer, "StudentApplicant", bo_app, "reject", json!({"reason": "the class is full"})).await.unwrap();
     let bo = t.get("StudentApplicant", bo_app).await;
     assert_eq!(bo["status"], "Rejected");
