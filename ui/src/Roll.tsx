@@ -4,7 +4,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
-import { api, docPath, refusal } from "@ferrum/client";
+import { api, docPath, refusal, t } from "@ferrum/client";
 import { Button, EmptyState, ErrorState, PageLoading, toast, useShellTitle } from "@ferrum/kit";
 import { classLine, type Row } from "./Home";
 
@@ -68,19 +68,19 @@ export function Roll() {
           <Link to={`/e/CourseSchedule/${id}`}>{classLine(cls)}</Link>
         </h2>
         <Button variant="primary" loading={save.isPending} disabled={!students.length} onClick={() => save.mutate()}>
-          Save attendance
+          {t("Save attendance")}
         </Button>
       </header>
       {students.length === 0 ? (
-        <EmptyState title="No students in this class's group">
-          <Link to={`/e/StudentGroup/${String(cls.student_group)}`}>Add them to the group</Link>
+        <EmptyState title={t("No students in this class's group")}>
+          <Link to={`/e/StudentGroup/${String(cls.student_group)}`}>{t("Add them to the group")}</Link>
         </EmptyState>
       ) : (
         <table className="table">
           <thead>
             <tr>
-              <th>Student</th>
-              <th>Attendance</th>
+              <th>{t("Student")}</th>
+              <th>{t("Attendance")}</th>
             </tr>
           </thead>
           <tbody>
@@ -98,7 +98,7 @@ export function Roll() {
                       <option key={v}>{v}</option>
                     ))}
                   </select>
-                  {kept.has(s.id) ? null : <span className="faint"> not taken yet</span>}
+                  {kept.has(s.id) ? null : <span className="faint"> {t("not taken yet")}</span>}
                 </td>
               </tr>
             ))}
