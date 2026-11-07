@@ -4,7 +4,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
-import { api, docPath, todayIso, t as tr } from "@ferrum/client";
+import { api, docPath, todayIso, t as tr, isolate } from "@ferrum/client";
 import { EmptyState, ErrorState, PageLoading, useShellTitle } from "@ferrum/kit";
 
 export interface Row {
@@ -30,7 +30,7 @@ export function classLine(c: Row): string {
 }
 
 export function Home() {
-  useShellTitle("School");
+  useShellTitle(tr("School"));
   const today = todayIso();
   const q = useQuery({
     queryKey: ["school", "home", today],
@@ -52,8 +52,8 @@ export function Home() {
       <div className="np-page">
         <EmptyState title={tr("Nothing set up yet")} icon="calendar">
           <p className="muted">
-            {tr("Set the company fees are invoiced from in")} <Link to="/e/EducationSettings">{tr("Education Settings")}</Link>{tr(", then add an")}{" "}
-            <Link to="/e/AcademicYear/new">{tr("academic year")}</Link> {tr("and a")} <Link to="/e/Program/new">program</Link> {tr("with its courses. Applicants, students, fees and the timetable follow from them.")}
+            {tr("Set the company fees are invoiced from in")} <Link to="/e/EducationSettings">{tr("Education Settings")}</Link>{tr(", then add an")}{isolate(" ")}
+            <Link to="/e/AcademicYear/new">{tr("academic year")}</Link> {tr("and a")} <Link to="/e/Program/new">{tr("program")}</Link> {tr("with its courses. Applicants, students, fees and the timetable follow from them.")}
           </p>
         </EmptyState>
       </div>
@@ -68,7 +68,7 @@ export function Home() {
           <ul className="stack">
             {classes.map((c) => (
               <li key={c.id}>
-                <Link to={`/e/CourseSchedule/${c.id}`}>{classLine(c)}</Link> · <Link to={`/class/${c.id}`}>{tr("Take attendance")}</Link>
+                <Link to={`/e/CourseSchedule/${c.id}`}>{isolate(classLine(c))}</Link> · <Link to={`/class/${c.id}`}>{tr("Take attendance")}</Link>
               </li>
             ))}
           </ul>

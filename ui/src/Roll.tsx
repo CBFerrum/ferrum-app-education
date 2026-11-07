@@ -4,7 +4,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
-import { api, docPath, refusal, t } from "@ferrum/client";
+import { api, docPath, refusal, t, isolate } from "@ferrum/client";
 import { Button, EmptyState, ErrorState, PageLoading, toast, useShellTitle } from "@ferrum/kit";
 import { classLine, type Row } from "./Home";
 
@@ -22,7 +22,7 @@ export function rollChanges(students: string[], kept: Map<string, { id: string; 
 
 export function Roll() {
   const { id = "" } = useParams();
-  useShellTitle("Attendance");
+  useShellTitle(t("Attendance"));
   const qc = useQueryClient();
   const [chosen, setChosen] = useState<Map<string, string>>(new Map());
   const q = useQuery({
@@ -51,7 +51,7 @@ export function Roll() {
       return changes.length;
     },
     onSuccess: (n) => {
-      toast(n ? `Attendance saved for ${n} ${n === 1 ? "student" : "students"}` : "Nothing changed");
+      toast(n ? t("Attendance saved for {n} {value}", { n, value: n === 1 ? "student" : "students" }) : t("Nothing changed"));
       setChosen(new Map());
       void qc.invalidateQueries({ queryKey: ["school"] });
     },
@@ -65,7 +65,7 @@ export function Roll() {
     <div className="np-page stack">
       <header className="row" style={{ justifyContent: "space-between" }}>
         <h2>
-          <Link to={`/e/CourseSchedule/${id}`}>{classLine(cls)}</Link>
+          <Link to={`/e/CourseSchedule/${id}`}>{isolate(classLine(cls))}</Link>
         </h2>
         <Button variant="primary" loading={save.isPending} disabled={!students.length} onClick={() => save.mutate()}>
           {t("Save attendance")}
@@ -86,16 +86,16 @@ export function Roll() {
           <tbody>
             {students.map((s) => (
               <tr key={s.id}>
-                <td>{s.name}</td>
+                <td>{isolate(s.name)}</td>
                 <td>
                   <select
                     className="select"
-                    aria-label={`Attendance of ${s.name}`}
+                    aria-label={t("Attendance of {name}", { name: s.name })}
                     value={statusOf(s.id)}
                     onChange={(e) => setChosen((m) => new Map(m).set(s.id, e.target.value))}
                   >
                     {STATUSES.map((v) => (
-                      <option key={v}>{v}</option>
+                      <option key={v}>{isolate(v)}</option>
                     ))}
                   </select>
                   {kept.has(s.id) ? null : <span className="faint"> {t("not taken yet")}</span>}
