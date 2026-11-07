@@ -4,7 +4,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
-import { api, docPath, todayIso } from "@ferrum/client";
+import { api, docPath, todayIso, t as tr } from "@ferrum/client";
 import { EmptyState, ErrorState, PageLoading, useShellTitle } from "@ferrum/kit";
 
 export interface Row {
@@ -50,26 +50,25 @@ export function Home() {
   if (!programs)
     return (
       <div className="np-page">
-        <EmptyState title="Nothing set up yet" icon="calendar">
+        <EmptyState title={tr("Nothing set up yet")} icon="calendar">
           <p className="muted">
-            Set the company fees are invoiced from in <Link to="/e/EducationSettings">Education Settings</Link>, then add an{" "}
-            <Link to="/e/AcademicYear/new">academic year</Link> and a <Link to="/e/Program/new">program</Link> with its courses. Applicants, students,
-            fees and the timetable follow from them.
+            {tr("Set the company fees are invoiced from in")} <Link to="/e/EducationSettings">{tr("Education Settings")}</Link>{tr(", then add an")}{" "}
+            <Link to="/e/AcademicYear/new">{tr("academic year")}</Link> {tr("and a")} <Link to="/e/Program/new">program</Link> {tr("with its courses. Applicants, students, fees and the timetable follow from them.")}
           </p>
         </EmptyState>
       </div>
     );
   return (
     <div className="np-page">
-      <section className="card card-pad stack" aria-label="Today's classes">
-        <h3>Today's classes ({classes.length})</h3>
+      <section className="card card-pad stack" aria-label={tr("Today's classes")}>
+        <h3>{tr("Today's classes ({length})", { length: classes.length })}</h3>
         {classes.length === 0 ? (
-          <p className="muted">None today.</p>
+          <p className="muted">{tr("None today.")}</p>
         ) : (
           <ul className="stack">
             {classes.map((c) => (
               <li key={c.id}>
-                <Link to={`/e/CourseSchedule/${c.id}`}>{classLine(c)}</Link> · <Link to={`/class/${c.id}`}>Take attendance</Link>
+                <Link to={`/e/CourseSchedule/${c.id}`}>{classLine(c)}</Link> · <Link to={`/class/${c.id}`}>{tr("Take attendance")}</Link>
               </li>
             ))}
           </ul>
@@ -77,11 +76,11 @@ export function Home() {
       </section>
       <div className="np-columns">
         <Link className="card card-pad stack" to="/e/StudentApplicant">
-          <span className="muted">Applicants waiting</span>
+          <span className="muted">{tr("Applicants waiting")}</span>
           <strong style={{ fontSize: 28 }}>{applicants}</strong>
         </Link>
         <Link className="card card-pad stack" to="/e/Fees">
-          <span className="muted">Fees invoiced, not yet paid</span>
+          <span className="muted">{tr("Fees invoiced, not yet paid")}</span>
           <strong style={{ fontSize: 28 }}>{fees}</strong>
         </Link>
       </div>
