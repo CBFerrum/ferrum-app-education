@@ -26,8 +26,8 @@ roles:
       - {entity: AcademicYear, read: true, write: true, create: true}
       - {entity: Course, read: true, write: true, create: true, delete: true}
       - {entity: Program, read: true, write: true, create: true, delete: true}
-      - {entity: StudentApplicant, read: true, write: true, create: true, export: true}
-      - {entity: Student, read: true, write: true, create: true, export: true, import: true}
+      - {entity: StudentApplicant, read: true, write: true, create: true, export: true, read_groups: [personal], write_groups: [personal]}
+      - {entity: Student, read: true, write: true, create: true, export: true, import: true, read_groups: [personal], write_groups: [personal]}
       - {entity: ProgramEnrollment, read: true, write: true, create: true}
       - {entity: FeeStructure, read: true, write: true, create: true}
       - {entity: Fees, read: true, write: true, create: true, export: true}
@@ -46,7 +46,7 @@ roles:
   - name: Teacher
     description: Sees the timetable and their groups, takes attendance and enters results.
     permissions:
-      - {entity: Student, read: true}
+      - {entity: Student, read: true, read_groups: [personal]}
       - {entity: StudentGroup, read: true}
       - {entity: Course, read: true}
       - {entity: Instructor, read: true}
@@ -61,6 +61,6 @@ roles:
     permissions:
       - {entity: Program, read: true}
       - {entity: AcademicYear, read: true}
-      - {entity: StudentApplicant, read: true, write: true, create: true}
-      - {entity: Student, read: true}
+      - {entity: StudentApplicant, read: true, write: true, create: true, read_groups: [personal], write_groups: [personal]}
+      - {entity: Student, read: true, read_groups: [personal]}
       - {entity: ProgramEnrollment, read: true}

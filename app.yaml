@@ -1,6 +1,6 @@
 id: education
 name: Education
-version: 0.2.6
+version: 0.2.7
 publisher: cbferrum
 summary: "A school's office: admissions, students and guardians, fees through ERP, a timetable without clashes, assessments and attendance"
 description: README.md
@@ -30,3 +30,18 @@ contributes:
     - {id: education, package: education, path: "school/e/{entity}/{id}", list: "school/e/{entity}"}
   shell.create:
     - {id: applicant, label: Applicant, path: school/e/StudentApplicant/new, entity: StudentApplicant}
+  # What the assistant should know in Education's pages, and what it suggests asking there.
+  shell.assistant:
+    - id: education
+      title: "Education"
+      instructions: >-
+        A StudentApplicant (Applied, Approved, Rejected, Admitted) becomes a Student when admitted, and a
+        ProgramEnrollment puts a student in a program for an academic year. Fees (Draft, Invoiced, Paid, Cancelled)
+        are invoiced through ERP: what is owed is the invoices' outstanding amount. CourseSchedule is the timetable.
+        StudentAttendance is Present, Absent, Late or Excused, and an AssessmentResult holds a grade on the program's
+        GradingScale. Students are often children: use their details only as far as the question needs.
+      suggestions:
+        - "Which students have unpaid fees?"
+        - "Who was absent today?"
+        - "Which applicants are waiting for a decision?"
+        - "What is on the timetable tomorrow?"

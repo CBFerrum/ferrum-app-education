@@ -62,7 +62,7 @@
   fields:
     - {name: applicant_name, type: data, required: true, in_list: true}
     - {name: email, type: email, in_list: true}
-    - {name: date_of_birth, type: date}
+    - {name: date_of_birth, type: date, perm_group: personal}
     - {name: program, type: link, to: Program, required: true, in_list: true, in_filter: true}
     - {name: academic_year, type: link, to: AcademicYear, required: true, in_list: true, in_filter: true}
     - {name: guardian_name, type: data}
@@ -93,7 +93,7 @@
   fields:
     - {name: student_name, type: data, required: true, in_list: true}
     - {name: email, type: email, in_list: true}
-    - {name: date_of_birth, type: date}
+    - {name: date_of_birth, type: date, perm_group: personal}
     - {name: status, type: select, options: [Active, Graduated, Left], default: Active, in_list: true, in_filter: true}
     - {name: customer, type: link, to: Customer, description: "Who fee invoices go to; made from the first guardian, or the student, when empty"}
     - {name: guardians, type: table, of: Guardian}
