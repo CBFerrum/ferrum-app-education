@@ -5,7 +5,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 import { api, docPath, todayIso, t as tr, isolate } from "@ferrum/client";
-import { EmptyState, ErrorState, PageLoading, useShellTitle } from "@ferrum/kit";
+import { EmptyState, ErrorState, PageLoading, useShellTitle, placed } from "@ferrum/kit";
 
 export interface Row {
   id: string;
@@ -52,8 +52,7 @@ export function Home() {
       <div className="np-page">
         <EmptyState title={tr("Nothing set up yet")} icon="calendar">
           <p className="muted">
-            {tr("Set the company fees are invoiced from in")} <Link to="/e/EducationSettings">{tr("Education Settings")}</Link>{tr(", then add an")}{isolate(" ")}
-            <Link to="/e/AcademicYear/new">{tr("academic year")}</Link> {tr("and a")} <Link to="/e/Program/new">{tr("program")}</Link> {tr("with its courses. Applicants, students, fees and the timetable follow from them.")}
+            {placed(tr("Set the company fees are invoiced from in {p1}, then add an {p2} and a {p3} with its courses. Applicants, students, fees and the timetable follow from them."), { p1: <Link to="/e/EducationSettings">{tr("Education Settings")}</Link>, p2: <Link to="/e/AcademicYear/new">{tr("academic year")}</Link>, p3: <Link to="/e/Program/new">{tr("program")}</Link> })}
           </p>
         </EmptyState>
       </div>

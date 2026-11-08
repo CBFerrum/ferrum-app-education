@@ -1,10 +1,10 @@
 {
-  ", then add an": ", फिर जोड़ें एक",
   "Add them to the group": "उन्हें समूह में जोड़ें",
   "Applicants waiting": "प्रतीक्षा में आवेदक",
   "Attendance": "उपस्थिति",
   "Attendance of {name}": "{name} की उपस्थिति",
-  "Attendance saved for {n} {value}": "{n} {value} की उपस्थिति सहेजी गई",
+  "Attendance saved for {n} student": "{n} छात्र के लिए उपस्थिति सहेजी गई",
+  "Attendance saved for {n} students": "{n} छात्रों के लिए उपस्थिति सहेजी गई",
   "Education Settings": "शिक्षा सेटिंग्स",
   "Fees invoiced, not yet paid": "शुल्क जिनका बिल बना, अभी भुगतान नहीं हुआ",
   "Go to the school office": "स्कूल कार्यालय पर जाएँ",
@@ -14,14 +14,12 @@
   "Nothing set up yet": "अभी कुछ सेट अप नहीं हुआ",
   "Save attendance": "उपस्थिति सहेजें",
   "School": "विद्यालय",
-  "Set the company fees are invoiced from in": "वह कंपनी सेट करें जिससे शुल्क का बिल बनता है, यहाँ",
+  "Set the company fees are invoiced from in {p1}, then add an {p2} and a {p3} with its courses. Applicants, students, fees and the timetable follow from them.": "{p1} में वह कंपनी तय करें जिससे शुल्क का चालान होता है, फिर एक {p2} और उसके पाठ्यक्रमों वाला {p3} जोड़ें। आवेदक, छात्र, शुल्क और समय सारणी इन्हीं से बनते हैं।",
   "Student": "छात्र",
   "Take attendance": "उपस्थिति लें",
   "Today's classes": "आज की कक्षाएँ",
   "Today's classes ({length})": "आज की कक्षाएँ ({length})",
   "academic year": "शैक्षणिक वर्ष",
-  "and a": "और एक",
   "not taken yet": "अभी नहीं ली गई",
-  "program": "कार्यक्रम",
-  "with its courses. Applicants, students, fees and the timetable follow from them.": "इसके पाठ्यक्रमों के साथ। आवेदक, छात्र, शुल्क और समय-सारणी इन्हीं से आते हैं।"
+  "program": "कार्यक्रम"
 }

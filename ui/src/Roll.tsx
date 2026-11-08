@@ -51,7 +51,7 @@ export function Roll() {
       return changes.length;
     },
     onSuccess: (n) => {
-      toast(n ? t("Attendance saved for {n} {value}", { n, value: n === 1 ? "student" : "students" }) : t("Nothing changed"));
+      toast(n ? (n === 1 ? t("Attendance saved for {n} student", { n }) : t("Attendance saved for {n} students", { n })) : t("Nothing changed"));
       setChosen(new Map());
       void qc.invalidateQueries({ queryKey: ["school"] });
     },

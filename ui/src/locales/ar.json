@@ -1,10 +1,10 @@
 {
-  ", then add an": "، ثم أضف",
   "Add them to the group": "أضفهم إلى المجموعة",
   "Applicants waiting": "متقدمون بالانتظار",
   "Attendance": "الحضور",
   "Attendance of {name}": "حضور {name}",
-  "Attendance saved for {n} {value}": "حُفظ الحضور لـ {n} {value}",
+  "Attendance saved for {n} student": "حُفظ الحضور لـ{n} طالب",
+  "Attendance saved for {n} students": "حُفظ الحضور لـ{n} طلاب",
   "Education Settings": "إعدادات التعليم",
   "Fees invoiced, not yet paid": "رسوم فُوترت ولم تُدفع بعد",
   "Go to the school office": "اذهب إلى مكتب المدرسة",
@@ -14,14 +14,12 @@
   "Nothing set up yet": "لم يُعدّ شيء بعد",
   "Save attendance": "احفظ الحضور",
   "School": "المدرسة",
-  "Set the company fees are invoiced from in": "عيّن الشركة التي تُفوتر منها الرسوم في",
+  "Set the company fees are invoiced from in {p1}, then add an {p2} and a {p3} with its courses. Applicants, students, fees and the timetable follow from them.": "حدّد الشركة التي تُفوتر منها الرسوم في {p1}، ثم أضف {p2} و{p3} بدوراته. ويتبع المتقدمون والطلاب والرسوم والجدول منها.",
   "Student": "الطالب",
   "Take attendance": "سجّل الحضور",
   "Today's classes": "فصول اليوم",
   "Today's classes ({length})": "فصول اليوم ({length})",
   "academic year": "عام دراسي",
-  "and a": "و",
   "not taken yet": "لم يُسجَّل بعد",
-  "program": "برنامج",
-  "with its courses. Applicants, students, fees and the timetable follow from them.": "بمقرراته. ويتبع منها المتقدمون والطلاب والرسوم والجدول الدراسي."
+  "program": "برنامج"
 }
