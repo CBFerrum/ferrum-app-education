@@ -1,8 +1,8 @@
 id: education
 name: Education
-version: 0.3.0
+version: 0.3.1
 publisher: cbferrum
-summary: "A school's office: admissions online and in the office, students and guardians, fees and fee schedules through ERP, a timetable without clashes, assessments, attendance, report cards and a portal for families"
+summary: "A school's office: admissions online, students and guardians, fees and fee schedules through ERP, timetables, attendance, assessments, report cards and a family portal"
 description: README.md
 categories: [education, industry]
 license: AGPL-3.0-only

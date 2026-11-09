@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+Its summary within the 200 characters the platform takes (0.3.0's was longer, and Ferrum's compiled apps refused it). Nothing else changes.
+
 ## 0.3.0
 
 Admission, family consent, fee schedules and academic reporting with guardians' access (FEO-047).
