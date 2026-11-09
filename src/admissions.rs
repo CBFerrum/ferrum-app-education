@@ -36,7 +36,7 @@ impl DocHook for ApplicantHook {
             }
             "admit" => {
                 let guardians: Vec<Value> = s(doc, "guardian_name")
-                    .map(|g| vec![json!({"guardian_name": g, "relation": "Guardian", "email": s(doc, "guardian_email"), "phone": s(doc, "guardian_phone")})])
+                    .map(|g| vec![json!({"guardian_name": g, "relation": s(doc, "guardian_relation").unwrap_or("Guardian"), "email": s(doc, "guardian_email"), "phone": s(doc, "guardian_phone")})])
                     .unwrap_or_default();
                 let student = hc
                     .kernel

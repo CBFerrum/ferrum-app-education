@@ -115,7 +115,7 @@ async fn customer_for(hc: &mut HookCtx<'_>, student: &Doc) -> Result<Uuid> {
 }
 
 /// `make_invoice`: the fees as a draft Sales Invoice, one line per component of the structure.
-async fn invoice(hc: &mut HookCtx<'_>, doc: &Doc) -> Result<Value> {
+pub(crate) async fn invoice(hc: &mut HookCtx<'_>, doc: &Doc) -> Result<Value> {
     let tenant = hc.ctx.tenant;
     let fees = id(doc, "id").ok_or_else(|| Error::internal("fees without an id"))?;
     let system = sys(hc.ctx);

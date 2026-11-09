@@ -4,8 +4,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, Link, RouterProvider, useRouteError } from "react-router";
-import { addCatalogs, routeBase, shell, t, wordsReady } from "@ferrum/client";
+import { createBrowserRouter, Link, Outlet, RouterProvider, useRouteError } from "react-router";
+import { addCatalogs, bootstrap, routeBase, shell, t, wordsReady } from "@ferrum/client";
 import { ConfirmHost, EmptyState, ErrorState, Toaster } from "@ferrum/kit";
 import { RequireAuth, setFrameMode } from "@ferrum/records/frame";
 import "./styles.css";
@@ -34,10 +34,41 @@ function Started() {
   return null;
 }
 
-setFrameMode("app", ["education"]);
+/** A page outside the frame: started, and drawn below. */
+function Bare() {
+  useEffect(() => shell().ready(), []);
+  return <Outlet />;
+}
 
-const router = createBrowserRouter(
-  [
+/** The family's page of the portal, when the platform serves this release there. */
+const FAMILY = "portal/family";
+const onPortal = bootstrap()?.app?.entry === FAMILY;
+
+if (!onPortal) setFrameMode("app", ["education"]);
+
+const familyRoutes = [
+  {
+    path: "/",
+    element: (
+      <main>
+        <Bare />
+      </main>
+    ),
+    errorElement: <RouteError />,
+    children: [{ index: true, lazy: () => import("./family/Family").then((m) => ({ Component: m.FamilyPage })) }],
+  },
+];
+
+const staffRoutes = [
+  // For families applying: no sign-in, no frame.
+  { path: "/apply/:tenant", element: <Bare />, errorElement: <RouteError />, children: [{ index: true, lazy: () => import("./family/Apply").then((m) => ({ Component: m.ApplyPage })) }] },
+  {
+    path: "/apply/:tenant/status/:token",
+    element: <Bare />,
+    errorElement: <RouteError />,
+    children: [{ index: true, lazy: () => import("./family/Apply").then((m) => ({ Component: m.StatusPage })) }],
+  },
+  { path: "/apply/*", element: <EmptyState title={t("Page not found")} icon="graduation-cap" /> },
     {
       path: "/",
       element: (
@@ -58,9 +89,9 @@ const router = createBrowserRouter(
         { path: "*", element: <NotFound /> },
       ],
     },
-  ],
-  { basename: routeBase("school") },
-);
+];
+
+const router = onPortal ? createBrowserRouter(familyRoutes, { basename: routeBase(FAMILY) }) : createBrowserRouter(staffRoutes, { basename: routeBase("school") });
 
 // Drawn once the page's words are in (its language's catalogs, fetched as the page starts).
 void wordsReady().then(() =>
