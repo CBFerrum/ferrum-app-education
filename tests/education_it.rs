@@ -281,4 +281,171 @@ async fn scenario() {
     );
     let lower = t.k.update(&teacher, "AssessmentResult", uid(&result["id"]), obj(json!({"score": "35"})), None).await.expect("corrected");
     assert_eq!((dec(&lower["percent"]), lower["grade"].as_str()), (70.0, Some("B")), "regraded");
+
+    // ───────────── families ─────────────
+    // An application online: the program opens to them, and a guardian consents to the school
+    // keeping the details.
+    let tenant_id = t.tenant;
+    let call = |who: Option<Ctx>, method: &'static str, path: String, body: Value| {
+        let k = k.clone();
+        async move {
+            let site = k.hooks.site("education").expect("education's endpoints").clone();
+            let req = ferrum_kernel::SiteRequest {
+                tenant: tenant_id,
+                user: who,
+                method: method.into(),
+                path: format!("/{path}"),
+                query: Default::default(),
+                headers: Default::default(),
+                body: if body.is_null() { vec![] } else { body.to_string().into_bytes() },
+                client_ip: "203.0.113.7".into(),
+            };
+            let r = site.handle(&k, req).await?;
+            Ok::<_, Error>((r.status, serde_json::from_slice::<Value>(&r.body).unwrap()))
+        }
+    };
+    refused(call(None, "GET", "apply/programs".into(), Value::Null).await, "not found", "");
+    t.k.update(&manager, "Program", grade5, obj(json!({"admissions_open": true})), None).await.expect("open to applications");
+    let grade6 = uid(&t.insert(&manager, "Program", json!({"program_name": "Grade 6", "code": "G6"})).await["id"]);
+    let open = call(None, "GET", "apply/programs".into(), Value::Null).await.unwrap().1;
+    assert_eq!((open["programs"][0]["code"].as_str(), open["years"][0]["name"].as_str()), (Some("G5"), Some("2026-27")));
+    let form = |consent: bool| {
+        json!({"applicant_name": "Dev Iyer", "date_of_birth": "2015-04-02", "program": "G5", "academic_year": "2026-27", "guardian_name": "Lata Iyer",
+               "guardian_email": "lata@family.test", "guardian_relation": "Mother", "consent": consent})
+    };
+    refused(call(None, "POST", "apply".into(), form(false)).await, "invalid", "consent");
+    let mut closed = form(true);
+    closed["program"] = json!("G6");
+    refused(call(None, "POST", "apply".into(), closed).await, "invalid", "is not open to applications");
+    assert_eq!(call(None, "POST", "apply".into(), json!({"website": "x"})).await.unwrap(), (201, json!({"status": "received"})));
+    let (code, applied) = call(None, "POST", "apply".into(), form(true)).await.expect("applied online");
+    assert_eq!((code, applied["application"]["status"].as_str(), applied["application"]["program"].as_str()), (201, Some("Applied"), Some("Grade 5")));
+    let token = applied["token"].as_str().unwrap().to_string();
+    let dev_app = t.find_one("StudentApplicant", json!({"applicant_name": "Dev Iyer"})).await;
+    assert_eq!((dev_app["source"].as_str(), dev_app["consent_given"].as_bool()), (Some("Online"), Some(true)));
+    assert!(dev_app["consent_on"].is_string() && dev_app["token_hash"].as_str().is_some_and(|h| h.len() == 64 && h != token), "{dev_app:?}");
+    let dev_app = uid(&dev_app["id"]);
+    t.k.run_action(&officer, "StudentApplicant", dev_app, "approve", Value::Null).await.unwrap();
+    let dev = uid(&t.k.run_action(&officer, "StudentApplicant", dev_app, "admit", Value::Null).await.unwrap()["student"]["id"]);
+    assert_eq!(call(None, "GET", format!("apply/status/{token}"), Value::Null).await.unwrap().1["application"]["status"], "Admitted");
+    refused(call(None, "GET", format!("apply/status/{}", "A".repeat(43)), Value::Null).await, "not found", "");
+    assert_eq!(t.get("Student", dev).await["guardians"][0]["relation"], "Mother");
+
+    // A fee schedule: the term's fees for everyone enrolled, once each, then invoiced together.
+    let six_a =
+        uid(&t.insert(&manager, "StudentGroup", json!({"group_name": "6A", "program": grade6.to_string(), "academic_year": year.to_string()})).await["id"]);
+    refused(
+        t.k.insert(&manager, "FeeSchedule", obj(json!({"fee_structure": sid.to_string(), "student_group": six_a.to_string(), "due_on": "2026-12-01"}))).await,
+        "invalid",
+        "a group of another program or year",
+    );
+    let term = uid(&t.insert(&manager, "FeeSchedule", json!({"fee_structure": sid.to_string(), "due_on": "2026-12-01"})).await["id"]);
+    refused(t.k.run_action(&manager, "FeeSchedule", term, "invoice_fees", Value::Null).await, "invalid", "make them first");
+    let made = t.k.run_action(&manager, "FeeSchedule", term, "make_fees", Value::Null).await.expect("made");
+    assert_eq!((made["fees_made"].as_i64(), made["message"].as_str()), (Some(2), Some("Made 2 students' fees; 2 in all")), "Ana and Dev, not Cy");
+    assert_eq!(t.k.run_action(&manager, "FeeSchedule", term, "make_fees", Value::Null).await.unwrap()["fees_made"], 2, "once each");
+    let invoiced = t.k.run_action(&manager, "FeeSchedule", term, "invoice_fees", Value::Null).await.expect("invoiced");
+    assert_eq!(invoiced["invoiced"], 2);
+    let devs = t.find_one("Fees", json!({"student": dev.to_string(), "fee_schedule": term.to_string()})).await;
+    let dev_invoice = t.get("SalesInvoice", uid(&devs["sales_invoice"])).await;
+    assert_eq!(t.get("Customer", uid(&dev_invoice["customer"])).await["customer_name"], "Lata Iyer", "his mother is invoiced");
+    let group_term = uid(&t
+        .insert(&manager, "FeeSchedule", json!({"fee_structure": sid.to_string(), "student_group": five_a.to_string(), "due_on": "2027-01-05"}))
+        .await["id"]);
+    assert_eq!(t.k.run_action(&manager, "FeeSchedule", group_term, "make_fees", Value::Null).await.unwrap()["fees_made"], 1, "5A is Ana alone");
+
+    // Ana's report card: each course's results averaged and graded, and her attendance.
+    let quiz = uid(&t
+        .insert(&manager, "AssessmentPlan", json!({"assessment_name": "Quiz", "student_group": five_a.to_string(), "course": science.to_string(), "date": "2026-11-01", "maximum_score": "20", "grading_scale": scale.to_string()}))
+        .await["id"]);
+    t.insert(&teacher, "AssessmentResult", json!({"assessment": quiz.to_string(), "student": ana.to_string(), "score": "18"})).await;
+    let unit_test = uid(&t
+        .insert(&manager, "AssessmentPlan", json!({"assessment_name": "Unit test", "student_group": five_a.to_string(), "course": math.to_string(), "date": "2026-11-05", "maximum_score": "100", "grading_scale": scale.to_string()}))
+        .await["id"]);
+    t.insert(&teacher, "AssessmentResult", json!({"assessment": unit_test.to_string(), "student": ana.to_string(), "score": "80"})).await;
+    let mut next_day = class(five_a, math, ira, r1, "09:00", "10:00");
+    next_day.insert("date".into(), json!("2026-09-02"));
+    let next_day = uid(&Value::String(t.k.insert(&manager, "CourseSchedule", next_day).await.unwrap()["id"].as_str().unwrap().into()));
+    t.insert(&teacher, "StudentAttendance", json!({"course_schedule": next_day.to_string(), "student": ana.to_string(), "status": "Absent"})).await;
+    let mut third_day = class(five_a, math, ira, r1, "09:00", "10:00");
+    third_day.insert("date".into(), json!("2026-09-03"));
+    let third_day = uid(&Value::String(t.k.insert(&manager, "CourseSchedule", third_day).await.unwrap()["id"].as_str().unwrap().into()));
+    t.insert(&teacher, "StudentAttendance", json!({"course_schedule": third_day.to_string(), "student": ana.to_string(), "status": "Late"})).await;
+    let card = t.insert(&teacher, "ReportCard", json!({"student": ana.to_string(), "academic_year": year.to_string(), "comment": "A good term."})).await;
+    let courses: Vec<(String, i64, f64, String)> = card["courses"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|c| (c["course"].as_str().unwrap().to_string(), c["assessments"].as_i64().unwrap(), dec(&c["percent"]), c["grade"].as_str().unwrap().to_string()))
+        .collect();
+    let mut want = vec![(math.to_string(), 2, 75.0, "B".to_string()), (science.to_string(), 1, 90.0, "A".to_string())];
+    want.sort_by(|x, y| x.0.cmp(&y.0));
+    let mut got = courses.clone();
+    got.sort_by(|x, y| x.0.cmp(&y.0));
+    assert_eq!(got, want, "Mathematics: 70% and 80%; Science: 90%");
+    assert_eq!(
+        (card["classes"].as_i64(), card["present"].as_i64(), card["absent"].as_i64(), dec(&card["attendance_percent"]), card["program"].as_str()),
+        (Some(3), Some(1), Some(1), 66.67, Some(grade5.to_string().as_str()))
+    );
+    refused(
+        t.k.insert(&teacher, "ReportCard", obj(json!({"student": ana.to_string(), "academic_year": year.to_string()}))).await,
+        "invalid",
+        "has its report card already",
+    );
+    let card = uid(&card["id"]);
+    let draft_dev = uid(&t.insert(&teacher, "ReportCard", json!({"student": dev.to_string(), "academic_year": year.to_string()})).await["id"]);
+    refused(t.k.run_action(&teacher, "ReportCard", draft_dev, "publish", Value::Null).await, "invalid", "no results or attendance");
+    t.k.run_action(&teacher, "ReportCard", card, "publish", Value::Null).await.expect("published");
+    refused(t.k.update(&teacher, "ReportCard", card, obj(json!({"comment": "Changed"})), None).await, "invalid", "kept as it was published");
+
+    // The family's portal: a guardian sees their own children, and nobody else's.
+    let portal = |email: &'static str| {
+        let k = k.clone();
+        let a = a.clone();
+        async move {
+            let id = k.create_user(&a, email, "Family", None, &[], false).await.unwrap();
+            k.set_user_kind(&a, id, "portal").await.unwrap();
+            k.load_ctx(a.tenant, id, None, "it".into()).await.unwrap()
+        }
+    };
+    assert!(matches!(call(None, "GET", "portal/family".into(), Value::Null).await, Err(Error::Unauthorized(_))), "signed in only");
+    let mira = portal("Mira@Family.test").await;
+    let mine = call(Some(mira.clone()), "GET", "portal/family".into(), Value::Null).await.unwrap().1;
+    let kids = mine["children"].as_array().unwrap();
+    assert_eq!(kids.len(), 1, "Ana only: {mine}");
+    let kid = &kids[0];
+    assert_eq!((kid["name"].as_str(), kid["enrollments"][0]["program"].as_str()), (Some("Ana Rao"), Some("Grade 5")));
+    assert_eq!((kid["attendance"]["present"].as_i64(), kid["attendance"]["absent"].as_i64(), kid["attendance"]["late"].as_i64()), (Some(1), Some(1), Some(1)));
+    let fees: Vec<(String, bool)> =
+        kid["fees"].as_array().unwrap().iter().map(|f| (f["status"].as_str().unwrap().to_string(), f["invoice"].is_string())).collect();
+    assert_eq!(fees.len(), 3, "{fees:?}");
+    assert!(fees.contains(&("Paid".to_string(), true)) && fees.contains(&("Invoiced".to_string(), false)), "a draft invoice is not the family's yet: {fees:?}");
+    let report = &kid["report_cards"][0];
+    assert_eq!(
+        (report["academic_year"].as_str(), dec(&report["attendance_percent"]), report["comment"].as_str()),
+        (Some("2026-27"), 66.67, Some("A good term."))
+    );
+    assert!(report["courses"].as_array().unwrap().iter().any(|c| c["course"] == "Mathematics" && c["grade"] == "B"), "{report}");
+    assert!(kid["consents"].as_array().unwrap().iter().all(|c| c["given"] == false));
+    let lata = portal("lata@family.test").await;
+    let hers = call(Some(lata.clone()), "GET", "portal/family".into(), Value::Null).await.unwrap().1;
+    assert_eq!(hers["children"].as_array().unwrap().iter().map(|c| c["name"].as_str().unwrap()).collect::<Vec<_>>(), ["Dev Iyer"]);
+    assert!(hers["children"][0]["report_cards"].as_array().unwrap().is_empty(), "a draft report card is not shown");
+    let stranger = portal("someone@else.test").await;
+    assert!(call(Some(stranger), "GET", "portal/family".into(), Value::Null).await.unwrap().1["children"].as_array().unwrap().is_empty());
+    // A family gives and withdraws its consents; who and when are kept.
+    let ask = |student: Uuid, what: &str, given: bool| json!({"student": student.to_string(), "consent": what, "given": given});
+    let gave = call(Some(mira.clone()), "POST", "portal/consents".into(), ask(ana, "Photos and Media", true)).await.expect("given").1;
+    assert_eq!(gave["message"], "Photos and Media: consent given");
+    let ana_now = t.get("Student", ana).await;
+    let row = ana_now["consents"].as_array().unwrap().iter().find(|c| c["consent"] == "Photos and Media").cloned().unwrap();
+    assert_eq!((row["given"].as_bool(), row["by"].as_str(), row["given_on"].is_string()), (Some(true), Some("mira@family.test"), true));
+    refused(call(Some(mira.clone()), "POST", "portal/consents".into(), ask(dev, "School Trips", true)).await, "not found", "");
+    refused(call(Some(mira.clone()), "POST", "portal/consents".into(), ask(ana, "Anything", true)).await, "invalid", "not one the school asks for");
+    call(Some(mira.clone()), "POST", "portal/consents".into(), ask(ana, "Photos and Media", false)).await.expect("withdrawn");
+    let again = call(Some(mira), "GET", "portal/family".into(), Value::Null).await.unwrap().1;
+    let photos = again["children"][0]["consents"].as_array().unwrap().iter().find(|c| c["consent"] == "Photos and Media").cloned().unwrap();
+    assert_eq!(photos["given"], false);
+    let _ = t.k.update(&manager, "Student", ana, obj(json!({"consents": []})), None).await;
+    assert_eq!(t.get("Student", ana).await["consents"].as_array().unwrap().len(), 1, "the office does not rewrite what the family said");
 }

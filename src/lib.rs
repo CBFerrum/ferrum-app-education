@@ -16,6 +16,8 @@
 mod admissions;
 mod fees;
 mod marks;
+mod records;
+mod site;
 mod timetable;
 
 use chrono::{NaiveDate, Utc};
@@ -46,7 +48,10 @@ pub fn register(hooks: &mut HookRegistry) {
         .register("StudentGroup", Arc::new(timetable::GroupHook))
         .register("CourseSchedule", Arc::new(timetable::ScheduleHook))
         .register("StudentAttendance", Arc::new(timetable::AttendanceHook))
-        .register("AssessmentResult", Arc::new(marks::ResultHook));
+        .register("AssessmentResult", Arc::new(marks::ResultHook))
+        .register("FeeSchedule", Arc::new(records::ScheduleHook))
+        .register("ReportCard", Arc::new(records::ReportCardHook))
+        .add_site("education", Arc::new(site::SchoolSite));
 }
 
 /// This app's reports: none of its own yet; its lists are its figures.

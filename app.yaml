@@ -1,8 +1,8 @@
 id: education
 name: Education
-version: 0.2.8
+version: 0.3.0
 publisher: cbferrum
-summary: "A school's office: admissions, students and guardians, fees through ERP, a timetable without clashes, assessments and attendance"
+summary: "A school's office: admissions online and in the office, students and guardians, fees and fee schedules through ERP, a timetable without clashes, assessments, attendance, report cards and a portal for families"
 description: README.md
 categories: [education, industry]
 license: AGPL-3.0-only
@@ -30,6 +30,12 @@ contributes:
     - {id: education, package: education, path: "school/e/{entity}/{id}", list: "school/e/{entity}"}
   shell.create:
     - {id: applicant, label: Applicant, path: school/e/StudentApplicant/new, entity: StudentApplicant}
+  # What families open without signing in: /school/apply/{workspace}, and an application's status below it.
+  shell.public:
+    - {id: apply, path: school/apply, title: Apply to the school}
+  # The workspace's portal (the education package's endpoints): a guardian's children at /portal/family/.
+  shell.portal:
+    - {id: family, title: "Your children's school", description: "Attendance, fees, report cards and the family's consents"}
   # What the assistant should know in Education's pages, and what it suggests asking there.
   shell.assistant:
     - id: education
