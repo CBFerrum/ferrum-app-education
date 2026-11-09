@@ -17,6 +17,21 @@ A school's office for [Ferrum](https://github.com/CBFerrum/Ferrum):
 
 - **Admissions.** An applicant is approved or rejected, and an approved one admitted. Admitting makes
   the student, with the applicant's guardian, and their enrollment in the program and year, once.
+- **Applications online.** A program open to applications is on the school's public page,
+  /school/apply/{workspace}: a family applies for a year still to come, with a guardian to reach and
+  their consent to the school keeping the details (when and that it was given are kept). They get the
+  application's own link to see where it stands; only its hash is kept, and writes are limited.
+- **The family's portal.** A guardian signed in to the workspace's portal with the address the school
+  lists sees each of their children: enrollment, this year's attendance, fees (an issued invoice opens
+  on ERP's "Your invoices"), published report cards, and the family's consents (photos and media,
+  school trips, sharing with Learn), which they give or withdraw there; who and when are kept, and the
+  office does not rewrite them. Nobody else's children.
+- **Fee schedules.** A fee structure due on a day for every student enrolled in its program and year,
+  or one group of them: making it makes each student's fees once, and invoicing it invoices those
+  still drafts.
+- **Report cards.** A student's year: each course's results averaged and graded on the scale of its
+  latest assessment, their attendance (present or late, of the classes taken), and a comment. Worked
+  out again while a draft; published, kept as it was and shown to the family. One a year.
 - **Fees through ERP.** A fee structure totals its components. A student's fees take that total,
   only for a program and year they are enrolled in. They are invoiced as a draft Sales Invoice, one
   line per component, to the first guardian, or to the student when there is no guardian. Upkeep
@@ -47,14 +62,16 @@ cd ui && npm run build && npm run check
 
 ## Not yet
 
-- Online applications, a parents' portal, and report cards as documents.
+- Report cards as printed documents, terms within a year, and comments by course.
 - Timetables made from rules, and room capacities enforced.
-- Courses' content and quizzes (Learn has them), and fee schedules for many students at once.
+- Courses' content and quizzes (Learn has them): consent to share with Learn is recorded, nothing is
+  sent there yet. Paying fees online (ERP's invoices page shows what is due).
 
 ## Changelog
 
 | Version | Highlights |
 |---|---|
+| **0.3.0** | Applications online with a guardian's consent; the family's portal (attendance, fees, report cards, consents); fee schedules; report cards (FEO-047). |
 | **0.2.8** | Its names in Arabic and Hindi; the last English sentences translated. |
 | **0.2.7** | The assistant knows its records; personal and health details in field groups. |
 | **0.2.6** | Rebuilt with Ferrum-Frontend 5b22e7b: its own words in Arabic and Hindi. |

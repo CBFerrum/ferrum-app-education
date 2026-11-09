@@ -9,7 +9,7 @@ modules:
     label: Education
     icon: graduation-cap
     order: 50
-    items: [Student, StudentApplicant, ProgramEnrollment, Fees, CourseSchedule, StudentAttendance, AssessmentPlan, AssessmentResult,
+    items: [Student, StudentApplicant, ProgramEnrollment, Fees, FeeSchedule, ReportCard, CourseSchedule, StudentAttendance, AssessmentPlan, AssessmentResult,
             StudentGroup, Program, Course, Instructor, Classroom, FeeStructure, GradingScale, AcademicYear, EducationSettings]
 
 # What a personal-data request exports and erases (the person's email): names and contacts; marks,
@@ -31,6 +31,8 @@ roles:
       - {entity: ProgramEnrollment, read: true, write: true, create: true}
       - {entity: FeeStructure, read: true, write: true, create: true}
       - {entity: Fees, read: true, write: true, create: true, export: true}
+      - {entity: FeeSchedule, read: true, write: true, create: true}
+      - {entity: ReportCard, read: true, write: true, create: true, export: true}
       - {entity: Instructor, read: true, write: true, create: true}
       - {entity: Classroom, read: true, write: true, create: true}
       - {entity: StudentGroup, read: true, write: true, create: true}
@@ -56,6 +58,7 @@ roles:
       - {entity: GradingScale, read: true}
       - {entity: AssessmentPlan, read: true}
       - {entity: AssessmentResult, read: true, write: true, create: true}
+      - {entity: ReportCard, read: true, write: true, create: true}
   - name: Admissions Officer
     description: Takes applications and approves, rejects or admits them.
     permissions:

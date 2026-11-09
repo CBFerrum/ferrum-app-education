@@ -41,6 +41,7 @@
   fields:
     - {name: program_name, type: data, required: true, in_list: true}
     - {name: code, type: data, required: true, unique: true, in_list: true, max_length: 20}
+    - {name: admissions_open, type: check, label: Applications Open Online, in_list: true, description: "Families apply for it on the school's application page, for a year not yet over"}
     - {name: courses, type: table, of: ProgramCourse}
   list: {columns: [code, program_name], sort: program_name asc}
 
@@ -68,9 +69,14 @@
     - {name: guardian_name, type: data}
     - {name: guardian_email, type: email}
     - {name: guardian_phone, type: phone}
+    - {name: guardian_relation, type: select, options: [Mother, Father, Guardian, Other], default: Guardian, label: Relation}
+    - {name: source, type: select, options: [Office, Online], default: Office, read_only: true, in_list: true, in_filter: true}
+    - {name: consent_given, type: check, read_only: true, no_copy: true, label: Guardian's Consent, description: "The guardian agreed to the school keeping and using these details for the admission"}
+    - {name: consent_on, type: datetime, read_only: true, no_copy: true, label: Consent Given On}
     - {name: status, type: select, options: [Applied, Approved, Rejected, Admitted], default: Applied, read_only: true, no_copy: true, in_list: true, in_filter: true}
     - {name: student, type: link, to: Student, read_only: true, no_copy: true}
     - {name: notes, type: text}
+    - {name: token_hash, type: data, read_only: true, hidden: true, no_copy: true, no_export: true}
   actions:
     - {name: approve, label: Approve, permission: write, condition: "doc.status == 'Applied'"}
     - name: reject
@@ -97,6 +103,7 @@
     - {name: status, type: select, options: [Active, Graduated, Left], default: Active, in_list: true, in_filter: true}
     - {name: customer, type: link, to: Customer, description: "Who fee invoices go to; made from the first guardian, or the student, when empty"}
     - {name: guardians, type: table, of: Guardian}
+    - {name: consents, type: table, of: StudentConsent, read_only: true, description: "What the family agreed to, and who said so: given and withdrawn on the family's portal"}
   numbering: {template: "STU-{YYYY}-{seq:5}"}
   list: {columns: [number, student_name, email, status], sort: student_name asc}
 
@@ -108,6 +115,15 @@
     - {name: relation, type: select, options: [Mother, Father, Guardian, Other], default: Guardian, in_list: true}
     - {name: email, type: email, in_list: true}
     - {name: phone, type: phone, in_list: true}
+
+- name: StudentConsent
+  label: Consent
+  kind: child
+  fields:
+    - {name: consent, type: select, options: [Photos and Media, School Trips, Sharing With Learn], required: true, in_list: true}
+    - {name: given, type: check, in_list: true}
+    - {name: by, type: data, in_list: true, description: "The guardian who said so"}
+    - {name: given_on, type: datetime, in_list: true, label: When}
 
 - name: ProgramEnrollment
   label: Enrollment
@@ -158,6 +174,7 @@
     - {name: amount, type: currency, read_only: true, in_list: true}
     - {name: status, type: select, options: [Draft, Invoiced, Paid, Cancelled], default: Draft, read_only: true, no_copy: true, in_list: true, in_filter: true}
     - {name: sales_invoice, type: link, to: SalesInvoice, read_only: true, no_copy: true}
+    - {name: fee_schedule, type: link, to: FeeSchedule, read_only: true, no_copy: true, description: "The schedule that made it"}
   actions:
     - {name: make_invoice, label: Invoice It, permission: write, condition: "doc.status == 'Draft'"}
   numbering: {template: "FEE-{YYYY}-{seq:5}"}
@@ -280,3 +297,57 @@
     - {name: grade, type: data, read_only: true, in_list: true}
     - {name: comment, type: text}
   list: {columns: [assessment, student, score, percent, grade], sort: created_at desc}
+
+- name: FeeSchedule
+  label: Fee Schedule
+  label_plural: Fee Schedules
+  kind: master
+  module: education
+  title_field: fee_structure
+  description: A fee structure due on a day for every student enrolled in its program and year (or in one group of them). Making it makes each student's fees once; invoicing it invoices those still to invoice.
+  fields:
+    - {name: fee_structure, type: link, to: FeeStructure, required: true, in_list: true, in_filter: true}
+    - {name: student_group, type: link, to: StudentGroup, description: "Only this group's students; every student enrolled in the structure's program and year when empty"}
+    - {name: due_on, type: date, required: true, in_list: true}
+    - {name: fees_made, type: int, read_only: true, no_copy: true, in_list: true}
+    - {name: invoiced, type: int, read_only: true, no_copy: true, in_list: true}
+  actions:
+    - {name: make_fees, label: Make the Fees, permission: write}
+    - {name: invoice_fees, label: Invoice Them, permission: write, confirm: "Each of its fees still a draft is invoiced through ERP. Continue?"}
+  list: {columns: [fee_structure, due_on, fees_made, invoiced], sort: due_on desc}
+
+- name: ReportCard
+  label: Report Card
+  label_plural: Report Cards
+  kind: master
+  module: education
+  title_field: student
+  description: "A student's year: each course's assessments averaged and graded, their attendance, and a comment. Worked out again while a draft; published, it is kept as it was and the family sees it on their portal."
+  fields:
+    - {name: student, type: link, to: Student, required: true, in_list: true, in_filter: true}
+    - {name: academic_year, type: link, to: AcademicYear, required: true, in_list: true, in_filter: true}
+    - {name: program, type: link, to: Program, read_only: true, in_list: true}
+    - {name: courses, type: table, of: ReportCardCourse, read_only: true}
+    - {name: classes, type: int, read_only: true, label: Classes Taken}
+    - {name: present, type: int, read_only: true}
+    - {name: absent, type: int, read_only: true}
+    - {name: late, type: int, read_only: true}
+    - {name: excused, type: int, read_only: true}
+    - {name: attendance_percent, type: percent, read_only: true, label: Attendance, description: "Present or late, of the classes taken"}
+    - {name: comment, type: text}
+    - {name: status, type: select, options: [Draft, Published], default: Draft, read_only: true, no_copy: true, in_list: true, in_filter: true}
+    - {name: published_by, type: data, read_only: true, no_copy: true}
+    - {name: published_on, type: date, read_only: true, no_copy: true}
+  actions:
+    - {name: publish, label: Publish It, permission: write, condition: "doc.status == 'Draft'", confirm: "The report card is kept as it is now, and the family sees it on their portal. Continue?"}
+  numbering: {template: "RC-{YYYY}-{seq:5}"}
+  list: {columns: [number, student, academic_year, attendance_percent, status], sort: created_at desc}
+
+- name: ReportCardCourse
+  label: Course
+  kind: child
+  fields:
+    - {name: course, type: link, to: Course, in_list: true}
+    - {name: assessments, type: int, in_list: true}
+    - {name: percent, type: percent, in_list: true, description: "Its assessments' percentages, averaged"}
+    - {name: grade, type: data, in_list: true, description: "On the grading scale of its latest assessment"}

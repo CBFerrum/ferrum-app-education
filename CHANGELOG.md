@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0
+
+Admission, family consent, fee schedules and academic reporting with guardians' access (FEO-047).
+
+- **Applications online.** Program's Applications Open Online puts it on the public page (/school/apply/{workspace}, `shell.public`): a family applies for a year not yet over, with a guardian's name and email and their consent to the school keeping the details (Guardian's Consent and Consent Given On are kept; Source is Online). The family gets the application's own link (only its SHA-256 kept) showing its status. Writes are limited per address; a hidden field catches programs. A guardian's relation reaches the student.
+- **The family's portal** (`shell.portal` family, /portal/family/): for a guardian signed in with an address the school lists, each child's enrollment, this year's attendance, fees (issued invoices open on ERP's "Your invoices"), published report cards, and consents (Photos and Media, School Trips, Sharing With Learn), given and withdrawn there with who and when kept on the student; the office does not rewrite them.
+- **Fee Schedule**: a structure due on a day for every enrolled active student (or one group of them); Make the Fees makes each student's fees once, Invoice Them invoices those still drafts.
+- **Report Card**: a student's year, each course's results averaged and graded on its latest assessment's scale, attendance counted (present or late, of the classes taken), a comment; worked out again while a draft, kept once published, one a year.
+- Names and words in Arabic and Hindi for the new fields and pages.
+
 ## 0.2.8
 
 Rebuilt with Ferrum-Frontend c59c9a2: the names of its models, fields and manifest in Arabic and Hindi (127 each in ui/src/locales/names, which the platform serves to every page of the workspace, so a record's labels, the launcher and the bar read in the person's language), and the sentences its pages still showed in English (split around a link or a figure, built in code from a template or word by word) whole and translated (23 words each in ui/src/locales). Translated by the model, to be reviewed by native speakers.
