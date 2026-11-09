@@ -71,6 +71,7 @@ cd ui && npm run build && npm run check
 
 | Version | Highlights |
 |---|---|
+| **0.3.1** | Its summary within the platform's 200 characters. |
 | **0.3.0** | Applications online with a guardian's consent; the family's portal (attendance, fees, report cards, consents); fee schedules; report cards (FEO-047). |
 | **0.2.8** | Its names in Arabic and Hindi; the last English sentences translated. |
 | **0.2.7** | The assistant knows its records; personal and health details in field groups. |
