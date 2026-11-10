@@ -104,6 +104,13 @@
     - {name: customer, type: link, to: Customer, description: "Who fee invoices go to; made from the first guardian, or the student, when empty"}
     - {name: guardians, type: table, of: Guardian}
     - {name: consents, type: table, of: StudentConsent, read_only: true, description: "What the family agreed to, and who said so: given and withdrawn on the family's portal"}
+  actions:
+    - name: set_consent
+      label: Give or Withdraw a Consent
+      permission: write
+      params:
+        - {name: consent, label: Consent, type: select, options: [Photos and Media, School Trips, Sharing With Learn], required: true}
+        - {name: given, label: Given, type: select, options: [Given, Withdrawn], required: true}
   numbering: {template: "STU-{YYYY}-{seq:5}"}
   list: {columns: [number, student_name, email, status], sort: student_name asc}
 

@@ -60,6 +60,7 @@
   "Enrollments": "नामांकन",
   "Excused": "क्षमा किया गया",
   "Families apply for it on the school's application page, for a year not yet over": "परिवार इसके लिए स्कूल के आवेदन पेज पर, अभी चल रहे वर्ष के लिए आवेदन करते हैं",
+  "Family": "परिवार",
   "Father": "पिता",
   "Fee Schedule": "फ़ीस अनुसूची",
   "Fee Schedules": "फ़ीस अनुसूचियाँ",
@@ -67,8 +68,10 @@
   "Fee Structures": "शुल्क संरचनाएँ",
   "Fees": "शुल्क",
   "Fees Made": "बनाई गई फ़ीस",
+  "For guardians on the portal - their children's records and the consents they give, reached by the address they sign in with.": "पोर्टल पर अभिभावकों के लिए - उनके बच्चों के रिकॉर्ड और उनकी दी गई सहमतियाँ, उस पते से जिससे वे साइन इन करते हैं।",
   "From Percent": "प्रतिशत से",
   "From Time": "समय से",
+  "Give or Withdraw a Consent": "सहमति दें या वापस लें",
   "Given": "दी गई",
   "Grade": "ग्रेड",
   "Grades": "ग्रेड",
@@ -168,6 +171,7 @@
   "Which students have unpaid fees?": "किन छात्रों के शुल्क अवैतनिक हैं?",
   "Who fee invoices go to; made from the first guardian, or the student, when empty": "शुल्क चालान किसे जाते हैं; खाली होने पर पहले अभिभावक, या छात्र से बनाए जाते हैं",
   "Who was absent today?": "आज कौन अनुपस्थित था?",
+  "Withdrawn": "वापस ली गई",
   "Year Name": "वर्ष का नाम",
   "Your children's school": "आपके बच्चों का स्कूल"
 }
