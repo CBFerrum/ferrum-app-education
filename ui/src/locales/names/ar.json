@@ -60,6 +60,7 @@
   "Enrollments": "التسجيلات",
   "Excused": "معذور",
   "Families apply for it on the school's application page, for a year not yet over": "تتقدم الأسر إليه عبر صفحة التقديم في المدرسة، لسنة لم تنتهِ بعد",
+  "Family": "الأسرة",
   "Father": "الأب",
   "Fee Schedule": "جدول الرسوم",
   "Fee Schedules": "جداول الرسوم",
@@ -67,8 +68,10 @@
   "Fee Structures": "هياكل الرسوم",
   "Fees": "الرسوم",
   "Fees Made": "الرسوم المنشأة",
+  "For guardians on the portal - their children's records and the consents they give, reached by the address they sign in with.": "لأولياء الأمور على البوابة - سجلات أطفالهم والموافقات التي يمنحونها، عبر العنوان الذي يسجّلون الدخول به.",
   "From Percent": "من نسبة",
   "From Time": "من وقت",
+  "Give or Withdraw a Consent": "منح موافقة أو سحبها",
   "Given": "ممنوحة",
   "Grade": "الدرجة",
   "Grades": "الدرجات",
@@ -168,6 +171,7 @@
   "Which students have unpaid fees?": "أي الطلاب لديهم رسوم غير مدفوعة؟",
   "Who fee invoices go to; made from the first guardian, or the student, when empty": "لمن تذهب فواتير الرسوم؛ وتُنشأ من أول ولي أمر، أو الطالب، عند الفراغ",
   "Who was absent today?": "من غاب اليوم؟",
+  "Withdrawn": "مسحوبة",
   "Year Name": "اسم السنة",
   "Your children's school": "مدرسة أطفالك"
 }
