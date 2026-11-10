@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+The family's portal as configuration too (Ferrum's builder-first gate BF1, docs/builder/portal.md).
+
+- **Family**, a portal role the package ships: a guardian's children, reached through each child's guardians by the address they sign in with (`via: guardians.email`, `via: student.guardians.email`), with their enrollments, attendance, fees and published report cards, on the portal's generic Your records page.
+- **Give or Withdraw a Consent**, a student's action: the family's consent given or withdrawn as on the family page, recorded with who did it. The Family role names it, so a guardian runs it without editing the student; the office runs it too.
+- Needs Ferrum with portal roles (BF1).
+
 ## 0.3.1
 
 Its summary within the 200 characters the platform takes (0.3.0's was longer, and Ferrum's compiled apps refused it). Nothing else changes.

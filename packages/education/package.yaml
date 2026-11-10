@@ -67,3 +67,17 @@ roles:
       - {entity: StudentApplicant, read: true, write: true, create: true, read_groups: [personal], write_groups: [personal]}
       - {entity: Student, read: true, read_groups: [personal]}
       - {entity: ProgramEnrollment, read: true}
+
+  # The family's portal as configuration (Ferrum docs/builder/decisions.md BD-02): a guardian's
+  # children, reached by the address they sign in with through each child's guardians, with their
+  # enrollments, attendance, fees and published report cards, and the consents the family gives.
+  # Given by administrators to portal people.
+  - name: Family
+    description: For guardians on the portal - their children's records and the consents they give, reached by the address they sign in with.
+    portal: true
+    permissions:
+      - {entity: Student, read: true, via: guardians.email, actions: [set_consent]}
+      - {entity: ProgramEnrollment, read: true, via: student.guardians.email}
+      - {entity: StudentAttendance, read: true, via: student.guardians.email}
+      - {entity: Fees, read: true, via: student.guardians.email}
+      - {entity: ReportCard, read: true, via: student.guardians.email, where: {status: Published}}

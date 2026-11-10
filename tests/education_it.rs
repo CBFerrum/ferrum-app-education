@@ -410,6 +410,7 @@ async fn scenario() {
     };
     assert!(matches!(call(None, "GET", "portal/family".into(), Value::Null).await, Err(Error::Unauthorized(_))), "signed in only");
     let mira = portal("Mira@Family.test").await;
+    let mira_user = mira.user;
     let mine = call(Some(mira.clone()), "GET", "portal/family".into(), Value::Null).await.unwrap().1;
     let kids = mine["children"].as_array().unwrap();
     assert_eq!(kids.len(), 1, "Ana only: {mine}");
@@ -428,6 +429,7 @@ async fn scenario() {
     assert!(report["courses"].as_array().unwrap().iter().any(|c| c["course"] == "Mathematics" && c["grade"] == "B"), "{report}");
     assert!(kid["consents"].as_array().unwrap().iter().all(|c| c["given"] == false));
     let lata = portal("lata@family.test").await;
+    let lata_user = lata.user;
     let hers = call(Some(lata.clone()), "GET", "portal/family".into(), Value::Null).await.unwrap().1;
     assert_eq!(hers["children"].as_array().unwrap().iter().map(|c| c["name"].as_str().unwrap()).collect::<Vec<_>>(), ["Dev Iyer"]);
     assert!(hers["children"][0]["report_cards"].as_array().unwrap().is_empty(), "a draft report card is not shown");
@@ -448,4 +450,50 @@ async fn scenario() {
     assert_eq!(photos["given"], false);
     let _ = t.k.update(&manager, "Student", ana, obj(json!({"consents": []})), None).await;
     assert_eq!(t.get("Student", ana).await["consents"].as_array().unwrap().len(), 1, "the office does not rewrite what the family said");
+
+    // ───────────── the same portal as configuration (Ferrum BF-PORTAL-006) ─────────────
+    // The package's Family role, given to each guardian: no app code between them and their children's
+    // records, which must be exactly what the app's page shows them.
+    let family = |user: Uuid| {
+        let k = k.clone();
+        let a = a.clone();
+        async move {
+            k.set_user_roles_until(&a, user, &["Family".to_string()], &Default::default()).await.expect("a portal role for a portal person");
+            k.load_ctx(a.tenant, user, None, "it".into()).await.unwrap()
+        }
+    };
+    let (mira_g, lata_g) = (family(mira_user).await, family(lata_user).await);
+    let all = |ctx: Ctx, entity: &'static str| {
+        let k = k.clone();
+        async move { k.list(&ctx, entity, &ListQuery { limit: Some(500), ..Default::default() }).await.unwrap().rows }
+    };
+    let ids = |rows: &[Doc]| rows.iter().map(|r| r["id"].as_str().unwrap().to_string()).collect::<Vec<_>>();
+    let page = call(Some(mira_g.clone()), "GET", "portal/family".into(), Value::Null).await.unwrap().1;
+    let kid = &page["children"][0];
+    assert_eq!(ids(&all(mira_g.clone(), "Student").await), [ana.to_string()], "her children, as the page lists them");
+    assert_eq!(ids(&all(lata_g.clone(), "Student").await), [dev.to_string()]);
+    let cards = all(mira_g.clone(), "ReportCard").await;
+    assert_eq!((cards.len(), kid["report_cards"].as_array().unwrap().len()), (1, 1), "published report cards");
+    assert_eq!(ids(&cards), [card.to_string()]);
+    assert!(all(lata_g.clone(), "ReportCard").await.is_empty(), "a draft report card is not the family's, as on the page");
+    assert_eq!(all(mira_g.clone(), "ProgramEnrollment").await.len(), kid["enrollments"].as_array().unwrap().len());
+    let marks = all(mira_g.clone(), "StudentAttendance").await;
+    for status in ["Present", "Absent", "Late"] {
+        assert_eq!(marks.iter().filter(|m| m["status"] == status).count() as i64, kid["attendance"][status.to_lowercase()].as_i64().unwrap(), "{status}");
+    }
+    let open_fees = all(mira_g.clone(), "Fees").await.into_iter().filter(|f| f["status"] != "Cancelled").count();
+    assert_eq!(open_fees, kid["fees"].as_array().unwrap().len(), "fees");
+    for (entity, other) in [("Student", dev), ("ReportCard", draft_dev)] {
+        assert!(t.k.get(&mira_g, entity, other, false).await.is_err(), "another family's {entity}");
+    }
+    let her_child = t.k.get(&mira_g, "Student", ana, false).await.unwrap();
+    assert!(her_child.get("date_of_birth").is_none_or(Value::is_null), "a personal field reached the portal");
+    refused(t.k.update(&mira_g, "Student", ana, obj(json!({"student_name": "Renamed"})), None).await, "forbidden", "");
+    // Consents through the role's one action, recorded as the page records them.
+    let consent = |what: &str, given: &str| json!({"consent": what, "given": given});
+    t.k.run_action(&mira_g, "Student", ana, "set_consent", consent("School Trips", "Given")).await.expect("given through the portal role");
+    let trips = t.get("Student", ana).await["consents"].as_array().unwrap().iter().find(|c| c["consent"] == "School Trips").cloned().unwrap();
+    assert_eq!((trips["given"].as_bool(), trips["by"].as_str()), (Some(true), Some("mira@family.test")));
+    refused(t.k.run_action(&mira_g, "Student", dev, "set_consent", consent("School Trips", "Given")).await, "not found", "");
+    refused(t.k.run_action(&mira_g, "Student", ana, "set_consent", consent("Anything", "Given")).await, "invalid", "not one the school asks for");
 }
