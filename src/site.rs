@@ -360,19 +360,57 @@ async fn consent(k: &Kernel, user: &Ctx, body: &Map<String, Value>) -> Result<Va
         if email.is_empty() || !children(&mut tx, user.tenant, &email).await?.contains(&child) {
             return Err(Error::NotFound("student".into()));
         }
-        let student = k.get_tx(&sctx, &mut tx, "Student", child, true).await?;
-        let mut kept: Vec<ferrum_kernel::Doc> = rows(&student, "consents")
-            .into_iter()
-            .filter(|r| s(r, "consent") != Some(what))
-            .map(|mut r| {
-                r.retain(|k, _| ["id", "consent", "given", "by", "given_on"].contains(&k.as_str()));
-                r
-            })
-            .collect();
-        kept.push(obj(json!({"consent": what, "given": given, "by": email, "given_on": Utc::now().to_rfc3339()})));
-        k.set_child_rows_tx(&sctx, &mut tx, "Student", "consents", child, kept).await?;
+        let done = record_consent(k, &sctx, &mut tx, child, what, given, &email).await?;
         tx.commit().await?;
-        Ok(json!({"consent": what, "given": given, "message": if given { format!("{what}: consent given") } else { format!("{what}: consent withdrawn") }}))
+        Ok(done)
     })
     .await
+}
+
+/// Keeps a family's consent to `what` on student `child`, given or withdrawn by `by`, in place of
+/// what it said before.
+async fn record_consent(k: &Kernel, sctx: &Ctx, tx: &mut Tx, child: Uuid, what: &str, given: bool, by: &str) -> Result<Value> {
+    let student = k.get_tx(sctx, tx, "Student", child, true).await?;
+    let mut kept: Vec<ferrum_kernel::Doc> = rows(&student, "consents")
+        .into_iter()
+        .filter(|r| s(r, "consent") != Some(what))
+        .map(|mut r| {
+            r.retain(|k, _| ["id", "consent", "given", "by", "given_on"].contains(&k.as_str()));
+            r
+        })
+        .collect();
+    kept.push(obj(json!({"consent": what, "given": given, "by": by, "given_on": Utc::now().to_rfc3339()})));
+    k.set_child_rows_tx(sctx, tx, "Student", "consents", child, kept).await?;
+    Ok(json!({"consent": what, "given": given, "message": if given { format!("{what}: consent given") } else { format!("{what}: consent withdrawn") }}))
+}
+
+/// A student's `set_consent` action: the family's consent given or withdrawn, as on the portal's
+/// page, by whoever runs it (a guardian through a portal role naming it, Ferrum
+/// docs/builder/decisions.md BD-02, or the school's office), recorded with their address.
+pub struct StudentHook;
+
+#[async_trait::async_trait]
+impl ferrum_kernel::DocHook for StudentHook {
+    fn name(&self) -> &'static str {
+        "education.student"
+    }
+
+    async fn action(&self, hc: &mut ferrum_kernel::HookCtx<'_>, name: &str, doc: &ferrum_kernel::Doc, params: &Value) -> Result<Option<Value>> {
+        if name != "set_consent" {
+            return Ok(None);
+        }
+        let what = params
+            .get("consent")
+            .and_then(Value::as_str)
+            .filter(|c| CONSENTS.contains(c))
+            .ok_or_else(|| Error::field("consent", "is not one the school asks for"))?;
+        let given = match params.get("given").and_then(Value::as_str) {
+            Some("Given") => true,
+            Some("Withdrawn") => false,
+            _ => return Err(Error::field("given", "is Given or Withdrawn")),
+        };
+        let child = id(doc, "id").ok_or_else(|| Error::internal("a student without an id"))?;
+        let by = hc.ctx.email.trim().to_lowercase();
+        Ok(Some(record_consent(hc.kernel, &sys(hc.ctx), hc.tx, child, what, given, &by).await?))
+    }
 }

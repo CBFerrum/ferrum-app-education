@@ -43,6 +43,7 @@ pub fn packages() -> std::result::Result<Vec<ferrum_meta::Package>, ferrum_meta:
 pub fn register(hooks: &mut HookRegistry) {
     hooks
         .register("StudentApplicant", Arc::new(admissions::ApplicantHook))
+        .register("Student", Arc::new(site::StudentHook))
         .register("FeeStructure", Arc::new(fees::StructureHook))
         .register("Fees", Arc::new(fees::FeesHook))
         .register("StudentGroup", Arc::new(timetable::GroupHook))
