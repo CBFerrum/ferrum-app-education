@@ -5,14 +5,18 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { refusal, t, isolate } from "@ferrum/client";
-import { Badge, EmptyState, ErrorState, PageLoading, statusTone, toast, useShellTitle } from "@ferrum/kit";
+import { Badge, EmptyState, ErrorState, ListSkeleton, statusTone, toast, useShellTitle } from "@ferrum/kit";
 import { attended, type Child, family, setConsent } from "./api";
+
+// Student.status and Fees.status as stored (packages/education/entities).
+const STUDENT_TONES = { Active: "green", Graduated: "blue", Left: "neutral" } as const;
+const FEE_TONES = { Draft: "neutral", Invoiced: "amber", Paid: "green", Cancelled: "neutral" } as const;
 
 export function FamilyPage() {
   useShellTitle(t("Your children's school"));
   const q = useQuery({ queryKey: ["school-family"], queryFn: ({ signal }) => family(signal) });
   if (q.error) return <ErrorState error={q.error} onRetry={() => void q.refetch()} />;
-  if (!q.data) return <PageLoading />;
+  if (!q.data) return <ListSkeleton className="ap-portal" />;
   return (
     <div className="stack ap-portal">
       <div className="page-head">
@@ -47,7 +51,7 @@ function ChildCard({ child }: { child: Child }) {
     <section className="card card-pad stack" aria-label={child.name}>
       <header className="row" style={{ justifyContent: "space-between" }}>
         <h2>{isolate(child.name)}</h2>
-        {child.status && <Badge tone={statusTone(child.status)}>{isolate(child.status)}</Badge>}
+        {child.status && <Badge tone={statusTone(child.status, STUDENT_TONES)}>{isolate(child.status)}</Badge>}
       </header>
       {child.enrollments[0] && <p className="faint">{isolate(`${child.enrollments[0].program}, ${child.enrollments[0].academic_year}`)}</p>}
       <div>
@@ -74,7 +78,7 @@ function ChildCard({ child }: { child: Child }) {
             {child.fees.map((f, i) => (
               <li key={i}>
                 {f.invoice ? <a href={`/portal/invoices/${f.invoice}`}>{isolate(f.structure)}</a> : isolate(f.structure)} · {isolate(f.amount ?? "")} ·{isolate(" ")}
-                {t("due {due}", { due: f.due_on })} · <Badge tone={statusTone(f.status)}>{isolate(f.status)}</Badge>
+                {t("due {due}", { due: f.due_on })} · <Badge tone={statusTone(f.status, FEE_TONES)}>{isolate(f.status)}</Badge>
               </li>
             ))}
           </ul>

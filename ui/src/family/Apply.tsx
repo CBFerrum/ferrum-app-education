@@ -7,7 +7,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 import { ApiError, bootstrap, refusal, t, isolate } from "@ferrum/client";
-import { Alert, Badge, Button, EmptyState, ErrorState, Field, PageLoading } from "@ferrum/kit";
+import { Alert, Badge, Button, EmptyState, ErrorState, Field, FormSkeleton } from "@ferrum/kit";
 import { type Applied, apply, programs, status, statusLink } from "./api";
 
 function Page({ children }: { children: React.ReactNode }) {
@@ -57,7 +57,7 @@ export function ApplyPage() {
   if (q.isPending)
     return (
       <Page>
-        <PageLoading />
+        <FormSkeleton />
       </Page>
     );
   if (q.isError)
@@ -160,7 +160,7 @@ export function StatusPage() {
   if (q.isPending)
     return (
       <Page>
-        <PageLoading />
+        <FormSkeleton />
       </Page>
     );
   if (q.isError)
