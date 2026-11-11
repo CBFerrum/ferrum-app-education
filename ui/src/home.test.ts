@@ -26,8 +26,8 @@ describe("the school office", () => {
     ]);
   });
 
-  it("leads a class's row with its time range, and keeps the rest beneath", () => {
-    expect(classRow({ id: "c", from_time: "09:00", to_time: "10:00", _titles: { course: "Mathematics", student_group: "6A", room: "Room 101", instructor: "Mr Weiss" } })).toEqual({ title: "09:00–10:00 · Mathematics", meta: "6A · Room 101 · Mr Weiss" });
-    expect(classRow({ id: "c", from_time: "09:00", to_time: "10:00" })).toEqual({ title: "09:00–10:00", meta: "" });
+  it("leads a class's row with its start time, and keeps the rest beneath", () => {
+    expect(classRow({ id: "c", from_time: "09:00", to_time: "10:00", _titles: { course: "Mathematics", student_group: "6A", room: "Room 101", instructor: "Mr Weiss" } })).toEqual({ lead: "09:00", title: "Mathematics", meta: "09:00–10:00 · 6A · Room 101 · Mr Weiss" });
+    expect(classRow({ id: "c", from_time: "09:00", to_time: "10:00" })).toEqual({ lead: "09:00", title: "", meta: "09:00–10:00" });
   });
 });

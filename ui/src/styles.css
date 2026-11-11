@@ -4,31 +4,6 @@
 @source "../../../ferrum/web/src";
 @source ".";
 
-/* The office's day: the two counts as tiles wide enough for their words, and the day's classes as one readable column.
-   The time leads each class, its digits one width so the times line up. */
-.edu-figures {
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-  margin-bottom: 16px;
-}
-
-.edu-today {
-  max-width: 800px;
-}
-
-.edu-figures strong {
-  color: var(--text);
-  font-weight: 600;
-}
-
-.edu-time {
-  font-variant-numeric: tabular-nums;
-}
-
-.edu-act {
-  position: relative; /* above the row's stretched link */
-  flex: none;
-}
-
 /* The roll call, used on a tablet or a phone: a mark is one button of at least 44px, four to a row, the selected one filled. */
 .edu-roll {
   margin: 0;
@@ -72,6 +47,13 @@
 
 .edu-marks .btn {
   padding-inline: 4px;
+}
+
+/* The class's link under the title: a touch target through the kit's token (44px on touch). */
+.edu-roll-class {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--control-h);
 }
 
 .edu-roll-foot {
