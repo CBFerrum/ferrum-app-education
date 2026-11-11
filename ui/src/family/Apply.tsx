@@ -5,10 +5,14 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import { ApiError, bootstrap, refusal, t, isolate } from "@ferrum/client";
-import { Alert, Badge, Button, EmptyState, ErrorState, Field, FormSkeleton } from "@ferrum/kit";
+import { GraduationCap } from "lucide-react";
+import { Alert, Button, ButtonLink, Field, FormSkeleton, LoadFailed, PageHead, StatePanel, StatusBadge } from "@ferrum/kit";
 import { type Applied, apply, programs, status, statusLink } from "./api";
+
+/** Application.status as stored (packages/education/entities), for `statusTone`: waiting amber, through or refused. */
+export const APPLICATION_TONES = { Applied: "amber", Approved: "amber", Rejected: "red", Admitted: "green" } as const;
 
 function Page({ children }: { children: React.ReactNode }) {
   return (
@@ -29,11 +33,11 @@ function Page({ children }: { children: React.ReactNode }) {
 function Closed({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   if (error instanceof ApiError && error.status === 404)
     return (
-      <EmptyState title={t("Applications are not open here")} icon="graduation-cap">
-        <p className="muted">{t("The school is not taking applications online now, or the address is not quite right.")}</p>
-      </EmptyState>
+      <StatePanel kind="empty" title={t("Applications are not open here")} icon={GraduationCap}>
+        {t("The school is not taking applications online now, or the address is not quite right.")}
+      </StatePanel>
     );
-  return <ErrorState error={error} onRetry={onRetry} />;
+  return <LoadFailed error={error} onRetry={onRetry} />;
 }
 
 export function ApplyPage() {
@@ -70,11 +74,17 @@ export function ApplyPage() {
     return (
       <Page>
         {"application" in done ? (
-          <section className="card card-pad stack" aria-label={t("Applied")}>
-            <h1>{t("Applied: {number}", { number: done.application.number })}</h1>
-            <p>{t("The school writes to the guardian about it. Keep its link: it shows where the application stands.")}</p>
-            <Link to={statusLink(tenant, done.token)}>{t("Your application")}</Link>
-          </section>
+          <>
+            <PageHead title={t("Applied: {number}", { number: done.application.number })} />
+            <section className="card card-pad stack" aria-label={t("Applied")}>
+              <p>{t("The school writes to the guardian about it. Keep its link: it shows where the application stands.")}</p>
+              <div>
+                <ButtonLink to={statusLink(tenant, done.token)} variant="primary">
+                  {t("Your application")}
+                </ButtonLink>
+              </div>
+            </section>
+          </>
         ) : (
           <Alert tone="success">{t("Thank you: your application is in.")}</Alert>
         )}
@@ -92,7 +102,7 @@ export function ApplyPage() {
           send.mutate();
         }}
       >
-        <h1>{t("Apply to the school")}</h1>
+        <PageHead title={t("Apply to the school")} />
         <section className="card card-pad stack" aria-label={t("The applicant")}>
           <Field label={t("Program")} required>
             <select className="select" value={program} onChange={(e) => setV({ ...v, program: e.target.value })}>
@@ -137,7 +147,7 @@ export function ApplyPage() {
           <Field label={t("Guardian's phone")}>
             <input className="input" type="tel" autoComplete="tel" maxLength={40} value={v.guardian_phone} onChange={(e) => setV({ ...v, guardian_phone: e.target.value })} />
           </Field>
-          <label className="row">
+          <label className="ap-consent">
             <input type="checkbox" checked={v.consent} onChange={(e) => setV({ ...v, consent: e.target.checked })} />
             {t("I agree to the school keeping and using these details for the admission.")}
           </label>
@@ -167,22 +177,19 @@ export function StatusPage() {
     return (
       <Page>
         {q.error instanceof ApiError && q.error.status === 404 ? (
-          <EmptyState title={t("This link does not work")} icon="graduation-cap">
-            <p className="muted">{t("It opens only the application it was given for.")}</p>
-          </EmptyState>
+          <StatePanel kind="empty" title={t("This link does not work")} icon={GraduationCap}>
+            {t("It opens only the application it was given for.")}
+          </StatePanel>
         ) : (
-          <ErrorState error={q.error} onRetry={() => void q.refetch()} />
+          <LoadFailed error={q.error} onRetry={() => void q.refetch()} />
         )}
       </Page>
     );
   const a = q.data.application;
   return (
     <Page>
+      <PageHead title={isolate(a.number)} actions={<span className="ap-head-badge"><StatusBadge value={a.status} tones={APPLICATION_TONES} /></span>} />
       <section className="card card-pad stack" aria-label={t("Your application")}>
-        <div className="row" style={{ justifyContent: "space-between" }}>
-          <h1>{isolate(a.number)}</h1>
-          <Badge tone={a.status === "Admitted" ? "green" : a.status === "Rejected" ? "red" : "amber"}>{isolate(a.status)}</Badge>
-        </div>
         <p>{t("{name}, {program}, {year}.", { name: a.applicant_name, program: a.program ?? "", year: a.academic_year ?? "" })}</p>
       </section>
     </Page>

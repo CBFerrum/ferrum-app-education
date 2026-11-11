@@ -38,6 +38,7 @@
   "No students in this class's group": "لا طلاب في مجموعة هذا الفصل",
   "None published yet.": "لم يُنشر شيء بعد.",
   "None today.": "لا شيء اليوم.",
+  "Not saved yet": "لم يُحفظ بعد",
   "Nothing changed": "لم يتغيّر شيء",
   "Nothing set up yet": "لم يُعدّ شيء بعد",
   "Once the school lists you as a guardian with this address, your children are here.": "متى أدرجتك المدرسة وليَّ أمر بهذا العنوان، يظهر أطفالك هنا.",
@@ -59,7 +60,7 @@
   "The school writes to the guardian about it. Keep its link: it shows where the application stands.": "تكتب المدرسة إلى ولي الأمر بشأنه. احتفظ برابطه: فهو يُظهر حالة الطلب.",
   "This link does not work": "هذا الرابط لا يعمل",
   "Today's classes": "فصول اليوم",
-  "Today's classes ({length})": "فصول اليوم ({length})",
+  "Waiting for the office": "بانتظار المكتب",
   "What the family agrees to": "ما توافق عليه الأسرة",
   "Where the school writes about the application": "حيث تكتب المدرسة بشأن الطلب",
   "Your application": "طلبك",
@@ -68,6 +69,7 @@
   "due {due}": "تستحق في {due}",
   "not taken yet": "لم يُسجَّل بعد",
   "program": "برنامج",
+  "{day} · {n} classes today": "{day} · {n} فصول اليوم",
   "{name}, {program}, {year}.": "{name}، {program}، {year}.",
   "{percent}% of {classes} classes: {present} present, {late} late, {absent} absent, {excused} excused": "{percent}% من {classes} حصص: {present} حضور، {late} تأخر، {absent} غياب، {excused} بعذر"
 }
