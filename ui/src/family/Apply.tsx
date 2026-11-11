@@ -8,11 +8,11 @@ import { useState } from "react";
 import { useParams } from "react-router";
 import { ApiError, bootstrap, refusal, t, isolate } from "@ferrum/client";
 import { GraduationCap } from "lucide-react";
-import { Alert, Button, ButtonLink, Field, FormSkeleton, LoadFailed, PageHead, StatePanel, StatusBadge } from "@ferrum/kit";
+import { Alert, Button, ButtonLink, Field, FormSkeleton, LoadFailed, PageHead, StatePanel, StatusBadge, type Tone } from "@ferrum/kit";
 import { type Applied, apply, programs, status, statusLink } from "./api";
 
 /** Application.status as stored (packages/education/entities), for `statusTone`: waiting amber, through or refused. */
-export const APPLICATION_TONES = { Applied: "amber", Approved: "amber", Rejected: "red", Admitted: "green" } as const;
+export const APPLICATION_TONES: Readonly<Record<string, Tone>> = { Applied: "amber", Approved: "amber", Rejected: "red", Admitted: "green" };
 
 function Page({ children }: { children: React.ReactNode }) {
   return (

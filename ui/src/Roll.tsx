@@ -86,7 +86,7 @@ export function Roll() {
       <PageHead
         title={t("Attendance")}
         description={
-          <Link to={`/e/CourseSchedule/${id}`} title={classLine(cls)}>
+          <Link className="edu-roll-class" to={`/e/CourseSchedule/${id}`} title={classLine(cls)}>
             {isolate(classLine(cls))}
           </Link>
         }

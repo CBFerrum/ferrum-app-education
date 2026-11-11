@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { GraduationCap } from "lucide-react";
 import { Link } from "react-router";
 import { api, docPath, formatValue, todayIso, t as tr, isolate } from "@ferrum/client";
-import { ButtonLink, HomeSkeleton, LoadFailed, PageHead, placed, Queue, StatePanel, Tile, TileGrid } from "@ferrum/kit";
+import { ButtonLink, HomeSkeleton, LoadFailed, PageHead, PageStack, placed, Queue, QueueItem, Stat, StatGrid, StatePanel } from "@ferrum/kit";
 
 export interface Row {
   id: string;
@@ -30,15 +30,11 @@ export function classLine(c: Row): string {
   return [`${String(c.from_time)} to ${String(c.to_time)}`, t.course, t.student_group, t.room, t.instructor].filter(Boolean).join(" · ");
 }
 
-/** The class's own row: its time range and course (the link to the class), then its group, room and instructor, and the
- *  one step the office takes from it. */
-export function classRow(c: Row): { title: string; meta: string } {
+/** The class's own row: its start time (the lead), its course, and beneath them its time range, group, room and instructor. */
+export function classRow(c: Row): { lead: string; title: string; meta: string } {
   const t = (c._titles ?? {}) as Record<string, string>;
-  return { title: `${String(c.from_time)}–${String(c.to_time)} · ${t.course ?? ""}`.replace(/ · $/, ""), meta: [t.student_group, t.room, t.instructor].filter(Boolean).join(" · ") };
+  return { lead: String(c.from_time), title: t.course ?? "", meta: [`${String(c.from_time)}–${String(c.to_time)}`, t.student_group, t.room, t.instructor].filter(Boolean).join(" · ") };
 }
-
-/** A count as a figure: tabular, and bold only when there is something to do (a zero is quiet). */
-const figure = (n: number) => (n ? <strong className="num-inline">{n}</strong> : <span className="num-inline">{n}</span>);
 
 export function Home() {
   const today = todayIso();
@@ -80,32 +76,27 @@ export function Home() {
       </>
     );
   return (
-    <>
+    <PageStack>
       {head(tr("{day} · {n} classes today", { day: formatValue({ type: "date" }, today), n: classes.length }))}
-      <TileGrid className="edu-figures" label={tr("Waiting for the office")}>
-        <Tile to="/e/StudentApplicant" title={tr("Applicants waiting")} meta={figure(applicants)} />
-        <Tile to="/e/Fees" title={tr("Fees invoiced, not yet paid")} meta={figure(fees)} />
-      </TileGrid>
-      <div className="edu-today">
+      <StatGrid>
+        <Stat to="/e/StudentApplicant" label={tr("Applicants waiting")} value={applicants} />
+        <Stat to="/e/Fees" label={tr("Fees invoiced, not yet paid")} value={fees} />
+      </StatGrid>
       <Queue title={tr("Today's classes")} count={classes.length} empty={tr("None today.")}>
         {classes.map((c) => {
           const row = classRow(c);
           return (
-            <li key={c.id} className="queue-item">
-              <div className="queue-text">
-                <Link className="queue-name edu-time" to={`/e/CourseSchedule/${c.id}`} title={row.title}>
-                  {isolate(row.title)}
-                </Link>
-                {row.meta && <span className="queue-meta">{isolate(row.meta)}</span>}
-              </div>
-              <span className="edu-act">
-                <ButtonLink to={`/class/${c.id}`}>{tr("Take attendance")}</ButtonLink>
-              </span>
-            </li>
+            <QueueItem
+              key={c.id}
+              to={`/e/CourseSchedule/${c.id}`}
+              lead={isolate(row.lead)}
+              title={isolate(row.title)}
+              meta={isolate(row.meta)}
+              action={<ButtonLink to={`/class/${c.id}`}>{tr("Take attendance")}</ButtonLink>}
+            />
           );
         })}
       </Queue>
-      </div>
-    </>
+    </PageStack>
   );
 }

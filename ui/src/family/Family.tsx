@@ -6,12 +6,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { refusal, t, isolate } from "@ferrum/client";
 import { GraduationCap } from "lucide-react";
-import { HomeSkeleton, LoadFailed, PageHead, StatePanel, StatusBadge, toast } from "@ferrum/kit";
+import { HomeSkeleton, LoadFailed, PageHead, StatePanel, StatusBadge, toast, type Tone } from "@ferrum/kit";
 import { attended, type Child, family, setConsent } from "./api";
 
 // Student.status and Fees.status as stored (packages/education/entities).
-const STUDENT_TONES = { Active: "green", Graduated: "blue", Left: "neutral" } as const;
-const FEE_TONES = { Draft: "neutral", Invoiced: "amber", Paid: "green", Cancelled: "neutral" } as const;
+const STUDENT_TONES: Readonly<Record<string, Tone>> = { Active: "green", Graduated: "blue", Left: "neutral" };
+const FEE_TONES: Readonly<Record<string, Tone>> = { Draft: "neutral", Invoiced: "amber", Paid: "green", Cancelled: "neutral" };
 
 export function FamilyPage() {
   const q = useQuery({ queryKey: ["school-family"], queryFn: ({ signal }) => family(signal) });
