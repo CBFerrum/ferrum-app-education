@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 import { api, docPath, refusal, t, isolate } from "@ferrum/client";
-import { Button, EmptyState, ErrorState, PageLoading, toast, useShellTitle } from "@ferrum/kit";
+import { Button, EmptyState, ErrorState, ListSkeleton, toast, useShellTitle } from "@ferrum/kit";
 import { classLine, type Row } from "./Home";
 
 export const STATUSES = ["Present", "Absent", "Late", "Excused"] as const;
@@ -57,7 +57,7 @@ export function Roll() {
     },
     onError: (e) => toast(refusal(e), "error"),
   });
-  if (q.isPending) return <PageLoading />;
+  if (q.isPending) return <ListSkeleton className="np-page" />;
   if (q.isError) return <ErrorState error={q.error} onRetry={() => void q.refetch()} />;
   const { cls, students, kept } = q.data;
   const statusOf = (s: string) => chosen.get(s) ?? kept.get(s)?.status ?? "Present";
