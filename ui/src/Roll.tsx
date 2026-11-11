@@ -3,9 +3,10 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { GraduationCap } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { api, docPath, refusal, t, isolate } from "@ferrum/client";
-import { Button, EmptyState, ErrorState, ListSkeleton, toast, useShellTitle } from "@ferrum/kit";
+import { Button, ButtonLink, HomeSkeleton, LoadFailed, PageHead, StatePanel, toast } from "@ferrum/kit";
 import { classLine, type Row } from "./Home";
 
 export const STATUSES = ["Present", "Absent", "Late", "Excused"] as const;
@@ -22,7 +23,6 @@ export function rollChanges(students: string[], kept: Map<string, { id: string; 
 
 export function Roll() {
   const { id = "" } = useParams();
-  useShellTitle(t("Attendance"));
   const qc = useQueryClient();
   const [chosen, setChosen] = useState<Map<string, string>>(new Map());
   const q = useQuery({
@@ -57,54 +57,75 @@ export function Roll() {
     },
     onError: (e) => toast(refusal(e), "error"),
   });
-  if (q.isPending) return <ListSkeleton className="np-page" />;
-  if (q.isError) return <ErrorState error={q.error} onRetry={() => void q.refetch()} />;
+  const back = { to: "/", label: t("School") };
+  if (q.isPending)
+    return (
+      <>
+        <PageHead title={t("Attendance")} back={back} />
+        <HomeSkeleton queues={1} />
+      </>
+    );
+  if (q.isError)
+    return (
+      <>
+        <PageHead title={t("Attendance")} back={back} />
+        <LoadFailed error={q.error} onRetry={() => void q.refetch()} />
+      </>
+    );
   const { cls, students, kept } = q.data;
+  // What a row shows is what the person marked, else what the server has, else Present: a mark the server has not taken is told so.
   const statusOf = (s: string) => chosen.get(s) ?? kept.get(s)?.status ?? "Present";
+  const unsaved = (s: string) => chosen.has(s) && chosen.get(s) !== (kept.get(s)?.status ?? "Present");
+  const saveButton = (
+    <Button variant="primary" loading={save.isPending} disabled={!students.length} onClick={() => save.mutate()}>
+      {t("Save attendance")}
+    </Button>
+  );
   return (
-    <div className="np-page stack">
-      <header className="row" style={{ justifyContent: "space-between" }}>
-        <h2>
-          <Link to={`/e/CourseSchedule/${id}`}>{isolate(classLine(cls))}</Link>
-        </h2>
-        <Button variant="primary" loading={save.isPending} disabled={!students.length} onClick={() => save.mutate()}>
-          {t("Save attendance")}
-        </Button>
-      </header>
+    <>
+      <PageHead
+        title={t("Attendance")}
+        description={
+          <Link to={`/e/CourseSchedule/${id}`} title={classLine(cls)}>
+            {isolate(classLine(cls))}
+          </Link>
+        }
+        back={back}
+        actions={saveButton}
+      />
       {students.length === 0 ? (
-        <EmptyState title={t("No students in this class's group")}>
-          <Link to={`/e/StudentGroup/${String(cls.student_group)}`}>{t("Add them to the group")}</Link>
-        </EmptyState>
+        <StatePanel
+          kind="empty"
+          title={t("No students in this class's group")}
+          icon={GraduationCap}
+          action={
+            <ButtonLink to={`/e/StudentGroup/${String(cls.student_group)}`} variant="primary">
+              {t("Add them to the group")}
+            </ButtonLink>
+          }
+        />
       ) : (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t("Student")}</th>
-              <th>{t("Attendance")}</th>
-            </tr>
-          </thead>
-          <tbody>
+        <>
+          <ul className="edu-roll" aria-label={t("Student")}>
             {students.map((s) => (
-              <tr key={s.id}>
-                <td>{isolate(s.name)}</td>
-                <td>
-                  <select
-                    className="select"
-                    aria-label={t("Attendance of {name}", { name: s.name })}
-                    value={statusOf(s.id)}
-                    onChange={(e) => setChosen((m) => new Map(m).set(s.id, e.target.value))}
-                  >
-                    {STATUSES.map((v) => (
-                      <option key={v}>{isolate(v)}</option>
-                    ))}
-                  </select>
-                  {kept.has(s.id) ? null : <span className="faint"> {t("not taken yet")}</span>}
-                </td>
-              </tr>
+              <li key={s.id} className="edu-roll-row">
+                <span className="edu-roll-name">
+                  {isolate(s.name)}
+                  {unsaved(s.id) ? <span className="edu-roll-note">{t("Not saved yet")}</span> : kept.has(s.id) ? null : <span className="edu-roll-note">{t("not taken yet")}</span>}
+                </span>
+                <span className="edu-marks" role="group" aria-label={t("Attendance of {name}", { name: s.name })}>
+                  {STATUSES.map((v) => (
+                    <Button key={v} variant={statusOf(s.id) === v ? "primary" : "default"} aria-pressed={statusOf(s.id) === v} onClick={() => setChosen((m) => new Map(m).set(s.id, v))}>
+                      {isolate(v)}
+                    </Button>
+                  ))}
+                </span>
+              </li>
             ))}
-          </tbody>
-        </table>
+          </ul>
+          <div className="edu-roll-foot">{saveButton}</div>
+        </>
       )}
-    </div>
+    </>
   );
 }

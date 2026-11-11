@@ -38,6 +38,7 @@
   "No students in this class's group": "इस कक्षा के समूह में कोई छात्र नहीं",
   "None published yet.": "अभी कुछ प्रकाशित नहीं हुआ।",
   "None today.": "आज कोई नहीं।",
+  "Not saved yet": "अभी सहेजा नहीं गया",
   "Nothing changed": "कुछ नहीं बदला",
   "Nothing set up yet": "अभी कुछ सेट अप नहीं हुआ",
   "Once the school lists you as a guardian with this address, your children are here.": "जब स्कूल आपको इस पते के साथ अभिभावक के रूप में दर्ज करेगा, आपके बच्चे यहाँ दिखेंगे।",
@@ -59,7 +60,7 @@
   "The school writes to the guardian about it. Keep its link: it shows where the application stands.": "स्कूल इसके बारे में अभिभावक को लिखता है। इसका लिंक रखें: यह बताता है कि आवेदन कहाँ है।",
   "This link does not work": "यह लिंक काम नहीं करता",
   "Today's classes": "आज की कक्षाएँ",
-  "Today's classes ({length})": "आज की कक्षाएँ ({length})",
+  "Waiting for the office": "कार्यालय की प्रतीक्षा में",
   "What the family agrees to": "परिवार किन बातों पर सहमत है",
   "Where the school writes about the application": "जहाँ स्कूल आवेदन के बारे में लिखता है",
   "Your application": "आपका आवेदन",
@@ -68,6 +69,7 @@
   "due {due}": "देय {due}",
   "not taken yet": "अभी नहीं ली गई",
   "program": "कार्यक्रम",
+  "{day} · {n} classes today": "{day} · आज {n} कक्षाएँ",
   "{name}, {program}, {year}.": "{name}, {program}, {year}।",
   "{percent}% of {classes} classes: {present} present, {late} late, {absent} absent, {excused} excused": "{classes} कक्षाओं में {percent}%: {present} उपस्थित, {late} देर से, {absent} अनुपस्थित, {excused} छुट्टी पर"
 }
