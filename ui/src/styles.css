@@ -4,16 +4,75 @@
 @source "../../../ferrum/web/src";
 @source ".";
 
-.np-page {
-  display: grid;
-  gap: 16px;
-  padding: 16px;
+/* The roll call, used on a tablet or a phone: a mark is one button of at least 44px, four to a row, the selected one filled. */
+.edu-roll {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
 }
 
-.np-columns {
+.edu-roll-row {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 8px 16px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.edu-roll-row:first-child {
+  border-top: 0;
+}
+
+.edu-roll-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.edu-roll-note {
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  font-weight: 400;
+}
+
+.edu-marks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.edu-marks .btn {
+  padding-inline: 4px;
+}
+
+/* The class's link under the title: a touch target through the kit's token (44px on touch). */
+.edu-roll-class {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--control-h);
+}
+
+.edu-roll-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+@media (min-width: 720px) {
+  .edu-roll-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+    align-items: center;
+  }
+}
+
+@media (max-width: 719px) {
+  .edu-roll-foot .btn {
+    width: 100%;
+  }
 }
 
 /* The application page: a column that reads on a phone. */
@@ -39,6 +98,74 @@
 
 .ap-portal {
   padding: 16px;
+}
+
+.ap-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ap-child h2,
+.ap-portal h2 {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.ap-portal h3 {
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.ap-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ap-fee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  min-height: 52px;
+  padding-block: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.ap-fee-what {
+  flex: 1;
+  min-width: 8rem;
+}
+
+.ap-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* A choice the family makes: the whole line is the target, at least 44px, the box a comfortable size. */
+.ap-consent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+}
+
+.ap-consent input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.ap-head-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-h);
 }
 
 .ap-trap {

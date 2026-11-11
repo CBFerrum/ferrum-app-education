@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classLine } from "./Home";
+import { classLine, classRow } from "./Home";
 import { rollChanges } from "./Roll";
 
 describe("the school office", () => {
@@ -24,5 +24,10 @@ describe("the school office", () => {
       { student: "ana", id: undefined, status: "Absent" },
       { student: "ben", id: undefined, status: "Present" },
     ]);
+  });
+
+  it("leads a class's row with its start time, and keeps the rest beneath", () => {
+    expect(classRow({ id: "c", from_time: "09:00", to_time: "10:00", _titles: { course: "Mathematics", student_group: "6A", room: "Room 101", instructor: "Mr Weiss" } })).toEqual({ lead: "09:00", title: "Mathematics", meta: "09:00–10:00 · 6A · Room 101 · Mr Weiss" });
+    expect(classRow({ id: "c", from_time: "09:00", to_time: "10:00" })).toEqual({ lead: "09:00", title: "", meta: "09:00–10:00" });
   });
 });
