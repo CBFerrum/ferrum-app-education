@@ -5,26 +5,38 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { refusal, t, isolate } from "@ferrum/client";
-import { Badge, EmptyState, ErrorState, PageLoading, statusTone, toast, useShellTitle } from "@ferrum/kit";
+import { GraduationCap } from "lucide-react";
+import { HomeSkeleton, LoadFailed, PageHead, StatePanel, StatusBadge, toast, type Tone } from "@ferrum/kit";
 import { attended, type Child, family, setConsent } from "./api";
 
+// Student.status and Fees.status as stored (packages/education/entities).
+const STUDENT_TONES: Readonly<Record<string, Tone>> = { Active: "green", Graduated: "blue", Left: "neutral" };
+const FEE_TONES: Readonly<Record<string, Tone>> = { Draft: "neutral", Invoiced: "amber", Paid: "green", Cancelled: "neutral" };
+
 export function FamilyPage() {
-  useShellTitle(t("Your children's school"));
   const q = useQuery({ queryKey: ["school-family"], queryFn: ({ signal }) => family(signal) });
-  if (q.error) return <ErrorState error={q.error} onRetry={() => void q.refetch()} />;
-  if (!q.data) return <PageLoading />;
+  const head = <PageHead title={t("Your children's school")} description={t("Attendance, fees, report cards and what the family agreed to.")} />;
+  if (q.error)
+    return (
+      <div className="ap-portal">
+        {head}
+        <LoadFailed error={q.error} onRetry={() => void q.refetch()} />
+      </div>
+    );
+  if (!q.data)
+    return (
+      <div className="ap-portal">
+        <PageHead title={t("Your children's school")} />
+        <HomeSkeleton queues={1} />
+      </div>
+    );
   return (
     <div className="stack ap-portal">
-      <div className="page-head">
-        <div>
-          <h1 className="page-title">{t("Your children's school")}</h1>
-          <p className="page-sub">{t("Attendance, fees, report cards and what the family agreed to.")}</p>
-        </div>
-      </div>
+      {head}
       {q.data.children.length === 0 ? (
-        <EmptyState title={t("No child here yet")} icon="graduation-cap">
-          <p className="muted">{t("Once the school lists you as a guardian with this address, your children are here.")}</p>
-        </EmptyState>
+        <StatePanel kind="empty" title={t("No child here yet")} icon={GraduationCap}>
+          {t("Once the school lists you as a guardian with this address, your children are here.")}
+        </StatePanel>
       ) : (
         q.data.children.map((c) => <ChildCard key={c.id} child={c} />)
       )}
@@ -45,9 +57,9 @@ function ChildCard({ child }: { child: Child }) {
   const percent = attended(child.attendance);
   return (
     <section className="card card-pad stack" aria-label={child.name}>
-      <header className="row" style={{ justifyContent: "space-between" }}>
+      <header className="ap-child">
         <h2>{isolate(child.name)}</h2>
-        {child.status && <Badge tone={statusTone(child.status)}>{isolate(child.status)}</Badge>}
+        {child.status && <StatusBadge value={child.status} tones={STUDENT_TONES} />}
       </header>
       {child.enrollments[0] && <p className="faint">{isolate(`${child.enrollments[0].program}, ${child.enrollments[0].academic_year}`)}</p>}
       <div>
@@ -70,11 +82,13 @@ function ChildCard({ child }: { child: Child }) {
         {child.fees.length === 0 ? (
           <p className="muted">{t("No fees yet.")}</p>
         ) : (
-          <ul className="stack">
+          <ul className="ap-list">
             {child.fees.map((f, i) => (
-              <li key={i}>
-                {f.invoice ? <a href={`/portal/invoices/${f.invoice}`}>{isolate(f.structure)}</a> : isolate(f.structure)} · {isolate(f.amount ?? "")} ·{isolate(" ")}
-                {t("due {due}", { due: f.due_on })} · <Badge tone={statusTone(f.status)}>{isolate(f.status)}</Badge>
+              <li key={i} className="ap-fee">
+                <span className="ap-fee-what">{f.invoice ? <a className="ap-link" href={`/portal/invoices/${f.invoice}`}>{isolate(f.structure)}</a> : isolate(f.structure)}</span>
+                <span className="num-inline">{isolate(f.amount ?? "")}</span>
+                <span className="muted">{t("due {due}", { due: f.due_on })}</span>
+                <StatusBadge value={f.status} tones={FEE_TONES} />
               </li>
             ))}
           </ul>
@@ -115,7 +129,7 @@ function ChildCard({ child }: { child: Child }) {
       <fieldset className="stack">
         <legend>{t("What the family agrees to")}</legend>
         {child.consents.map((c) => (
-          <label key={c.consent} className="row">
+          <label key={c.consent} className="ap-consent">
             <input type="checkbox" checked={c.given} disabled={change.isPending} onChange={(e) => change.mutate({ consent: c.consent, given: e.target.checked })} />
             {isolate(c.consent)}
             {c.by && <span className="faint">{t("({by}, {when})", { by: c.by, when: (c.given_on ?? "").slice(0, 10) })}</span>}

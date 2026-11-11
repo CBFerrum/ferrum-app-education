@@ -71,6 +71,7 @@ cd ui && npm run build && npm run check
 
 | Version | Highlights |
 |---|---|
+| **0.4.1** | The redesigned interface: the upgraded design system, shaped loading, told-apart states. |
 | **0.4.0** | The Family role: the family's portal as configuration; a consent given or withdrawn as an action. |
 | **0.3.1** | Its summary within the platform's 200 characters. |
 | **0.3.0** | Applications online with a guardian's consent; the family's portal (attendance, fees, report cards, consents); fee schedules; report cards (FEO-047). |
