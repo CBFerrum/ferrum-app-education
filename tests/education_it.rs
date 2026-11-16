@@ -353,6 +353,20 @@ async fn scenario() {
         .insert(&manager, "FeeSchedule", json!({"fee_structure": sid.to_string(), "student_group": five_a.to_string(), "due_on": "2027-01-05"}))
         .await["id"]);
     assert_eq!(t.k.run_action(&manager, "FeeSchedule", group_term, "make_fees", Value::Null).await.unwrap()["fees_made"], 1, "5A is Ana alone");
+    // A guardian who already is a customer, for a brother or sister, is invoiced as that customer; no
+    // second one is made.
+    let mut family = vec![];
+    for name in ["Jae Kim", "Min Kim"] {
+        let child = json!({"student_name": name, "guardians": [{"guardian_name": "Pat Kim", "email": "pat@family.test"}]});
+        let child = uid(&t.insert(&manager, "Student", child).await["id"]);
+        let enrolled = json!({"student": child.to_string(), "program": grade5.to_string(), "academic_year": year.to_string(), "enrolled_on": "2026-06-01"});
+        t.insert(&manager, "ProgramEnrollment", enrolled).await;
+        let fees =
+            uid(&t.insert(&manager, "Fees", json!({"student": child.to_string(), "fee_structure": sid.to_string(), "due_on": "2027-01-05"})).await["id"]);
+        let made = t.k.run_action(&manager, "Fees", fees, "make_invoice", Value::Null).await.expect("invoiced");
+        family.push((t.get("SalesInvoice", uid(&made["sales_invoice"]["id"])).await["customer"].clone(), t.get("Student", child).await["customer"].clone()));
+    }
+    assert_eq!(family[1], family[0], "the family's one customer, kept on each child: {family:?}");
 
     // Ana's report card: each course's results averaged and graded, and her attendance.
     let quiz = uid(&t
