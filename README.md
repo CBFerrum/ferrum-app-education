@@ -7,7 +7,7 @@
 
 <br>
 
-[![Version](https://img.shields.io/badge/version-0.4.2-1d4ed8?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.4.4-1d4ed8?style=flat-square)](CHANGELOG.md)
 [![Licence: AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-blue?style=flat-square)](LICENSE)
 [![Ferrum platform](https://img.shields.io/badge/runs%20on-Ferrum-2f5bea?style=flat-square)](https://github.com/CBFerrum/Ferrum)
 ![Rust](https://img.shields.io/badge/Rust-server-b7410e?style=flat-square&logo=rust)
@@ -362,6 +362,7 @@ at the K-12 level, with differences by product.
 
 ### ✅ Recently shipped
 
+- [x] **0.4.4** Rebuilt on Ferrum-Frontend 06bd1a2: the school's, the applying and the family's pages start through `mountApp`; no routes to the screens apps no longer have.
 - [x] **0.4.2** Tuned design system: better menu icons, lighter first page, cleaner print.
 - [x] **0.4.1** The redesigned interface with shaped loading and told-apart states.
 - [x] **0.4.0** The Family role: the family's portal as configuration; a consent given or withdrawn as an action.

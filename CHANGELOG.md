@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.4
+
+Needs the same platform as 0.4.3. No database change. Interface only, `ui/dist` rebuilt with Ferrum-Frontend `06bd1a2`.
+
+- The two routes to the screens apps no longer have (`apps/:app/settings`, `x/:app/:page`) are gone.
+- The page starts through the frontend's `mountApp`, which keeps lists fresh for 30 seconds (Education said 5); the
+  interface lint has no baseline file any more.
+
 ## 0.4.3
 
 A student's customer is ERP's to find or make (`portal::customer_for`, ERP 0.28.3), the one way every app that bills a person has; Education's own copy, which always made one, is gone. Needs ERP 0.28.3 (`requires: {erp: ">=0.28.3"}`).
