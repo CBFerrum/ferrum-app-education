@@ -1,13 +1,14 @@
 //! Fees: a fee structure's total from its components; a student's fees take it as their amount and
-//! are invoiced through ERP to the student's customer (made from their first guardian, or from them);
+//! are invoiced through ERP to the student's customer (ERP's for their first guardian, or for them);
 //! upkeep marks fees paid once their invoice is submitted and settled.
 
 use crate::obj;
 use async_trait::async_trait;
 use chrono::NaiveDate;
+use ferrum_app_erp::portal;
 use ferrum_domain::flow::{create_for_user, created};
 use ferrum_domain::util::{d, elevated, id, money, rows, s, set, sys};
-use ferrum_kernel::{Ctx, Doc, DocHook, Error, HookCtx, Kernel, Result};
+use ferrum_kernel::{Action, Ctx, Doc, DocHook, Error, HookCtx, Kernel, Result};
 use ferrum_meta::effective::Schema;
 use rust_decimal::Decimal;
 use serde_json::{Value, json};
@@ -97,7 +98,8 @@ impl DocHook for FeesHook {
     }
 }
 
-/// The student's customer: theirs, or one made from their first guardian (or them), and kept.
+/// The student's customer: theirs, else ERP's for their first guardian (or them): the one that
+/// email names, or one made now by a user who may make customers; kept on the student.
 async fn customer_for(hc: &mut HookCtx<'_>, student: &Doc) -> Result<Uuid> {
     if let Some(c) = id(student, "customer") {
         return Ok(c);
@@ -105,11 +107,11 @@ async fn customer_for(hc: &mut HookCtx<'_>, student: &Doc) -> Result<Uuid> {
     let sid = id(student, "id").ok_or_else(|| Error::internal("a student without an id"))?;
     let guardian = rows(student, "guardians").into_iter().next();
     let (name, email) = match &guardian {
-        Some(g) => (s(g, "guardian_name").map(str::to_string), s(g, "email").map(str::to_string)),
-        None => (s(student, "student_name").map(str::to_string), s(student, "email").map(str::to_string)),
+        Some(g) => (s(g, "guardian_name"), s(g, "email")),
+        None => (s(student, "student_name"), s(student, "email")),
     };
-    let customer = create_for_user(hc, "Customer", obj(json!({"customer_name": name, "customer_type": "Individual", "email": email}))).await?;
-    let cid = id(&customer, "id").ok_or_else(|| Error::internal("a customer without an id"))?;
+    hc.ctx.require("Customer", Action::Create)?;
+    let (cid, _) = portal::customer_for(hc.kernel, &elevated(hc.ctx), hc.tx, name.unwrap_or_default(), email, None).await?;
     hc.kernel.set_values_tx(&elevated(hc.ctx), hc.tx, "Student", sid, obj(json!({"customer": cid.to_string()}))).await?;
     Ok(cid)
 }

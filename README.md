@@ -48,7 +48,7 @@ guardian sees their children on the workspace's portal.
 | **Version** | 0.4.2 |
 | **Kind** | Its own interface at `/school/` (today's classes, a class roll call, what waits on the office); the public application page; the family's portal page; every record in Ferrum's lists and forms |
 | **What it adds** | 26 record types (18 documents, 7 child tables, 1 settings record), 4 roles (one for the portal), 1 menu |
-| **Depends on** | Ferrum platform `>=0.3.2, <0.4`; ERP `>=0.1` (installing Education installs ERP) |
+| **Depends on** | Ferrum platform `>=0.3.2, <0.4`; ERP `>=0.28.3` (installing Education installs ERP) |
 | **Works with** | ERP (customers, items, companies, sales invoices); Learn (consent to share is recorded, nothing is sent yet) |
 | **Languages** | English, Arabic, Hindi (words and record names); right-to-left layout |
 | **Tests** | 2 Rust tests (one walks a term on PostgreSQL) and a UI suite |
@@ -146,8 +146,9 @@ guardian sees their children on the workspace's portal.
 
 ### 🧒 Students, guardians and enrollment
 
-- **Students.** Name, email, date of birth, status (*Active, Graduated, Left*), the customer fees are invoiced to (made from the first
-  guardian, or from the student when there is none), and guardians with relation, email and phone.
+- **Students.** Name, email, date of birth, status (*Active, Graduated, Left*), the customer fees are invoiced to (the one the
+  first guardian's email already names, as for a brother or sister, else one made from the guardian; from the student when
+  there is no guardian), and guardians with relation, email and phone.
 - **Enrollments.** A student in a program for an academic year, with the date enrolled.
 - **Family consents.** The consents *Photos and Media*, *School Trips* and *Sharing With Learn*. A guardian gives or withdraws each on
   the portal, or the office does it as an action. Who and when are kept, and the office does not rewrite them. Consent to share with
