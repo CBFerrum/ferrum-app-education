@@ -15,11 +15,12 @@
 ![React](https://img.shields.io/badge/React%20%2B%20TypeScript-interface-087ea4?style=flat-square&logo=react&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-2%20Rust%20%2B%20UI%20suite-16a34a?style=flat-square)
 
-### A school's office in one place: admissions online, fees in the books, a timetable that cannot clash, and a family portal.
+### A school's office in one place: admissions online, fees in the books, a timetable that refuses clashes, and a family portal.
 
 Ferrum Education is for schools and small colleges. Families apply online. The office admits students, bills fees through
 Ferrum ERP, builds a timetable and takes attendance. Teachers enter results, the school publishes report cards, and each
-guardian sees their children on the workspace's portal.
+guardian sees their children on the workspace's portal. Results and report cards are there; transcripts, credits and GPA
+are not.
 
 [💡 Why](#-why-education) · [📸 Screenshots](#-screenshots) · [✨ Features](#-features) · [📊 Compare](#-how-it-compares) · [📍 Roadmap](#-roadmap) · [🚀 Install](#-install) · [🔧 Develop](#-develop)
 
@@ -31,9 +32,10 @@ guardian sees their children on the workspace's portal.
   reach and their consent to the school keeping the details. The family gets a private link to see where it stands.
 - 🎓 **Admit in one step.** Admitting an applicant makes the student, with their guardian, and their enrollment in the program and
   year, once.
-- 💳 **Fees in the school's own books.** Fees are invoiced to the first guardian through ERP as a draft Sales Invoice, and marked
-  paid once the invoice is.
-- 🗓️ **A timetable that cannot double-book.** No room, instructor or student group is in two classes at once.
+- 💳 **Fees in the school's own books.** Fees are invoiced through ERP as a draft Sales Invoice to the student's customer (the
+  first guardian's, found or made through ERP), and marked paid once the invoice is.
+- 🗓️ **A timetable that refuses clashes.** A class that overlaps another in the same room, with the same instructor or for the same
+  student group is refused when it is saved.
 - 👨‍👩‍👧 **A family portal.** Guardians see each child's enrollment, attendance, fees and published report cards, and give or withdraw
   the family's consents. Nobody else's children.
 - 🔏 **Children's data treated with care.** Dates of birth are in a restricted field group, and a personal-data request erases names,
@@ -45,7 +47,7 @@ guardian sees their children on the workspace's portal.
 
 | | |
 |---|---|
-| **Version** | 0.4.2 |
+| **Version** | 0.4.4 |
 | **Kind** | Its own interface at `/school/` (today's classes, a class roll call, what waits on the office); the public application page; the family's portal page; every record in Ferrum's lists and forms |
 | **What it adds** | 26 record types (18 documents, 7 child tables, 1 settings record), 4 roles (one for the portal), 1 menu |
 | **Depends on** | Ferrum platform `>=0.3.2, <0.4`; ERP `>=0.28.3` (installing Education installs ERP) |
@@ -148,7 +150,7 @@ guardian sees their children on the workspace's portal.
 
 - **Students.** Name, email, date of birth, status (*Active, Graduated, Left*), the customer fees are invoiced to (the one the
   first guardian's email already names, as for a brother or sister, else one made from the guardian; from the student when
-  there is no guardian), and guardians with relation, email and phone.
+  there is no guardian; a guardian without an email gets a customer for each child), and guardians with relation, email and phone.
 - **Enrollments.** A student in a program for an academic year, with the date enrolled.
 - **Family consents.** The consents *Photos and Media*, *School Trips* and *Sharing With Learn*. A guardian gives or withdraws each on
   the portal, or the office does it as an action. Who and when are kept, and the office does not rewrite them. Consent to share with
@@ -170,7 +172,8 @@ guardian sees their children on the workspace's portal.
 
 - **Groups.** A student group holds students enrolled in its program and year, each once.
 - **Classes.** A class is a group, a course, an instructor and a room at a time on a date, with times in `HH:MM`.
-- **No clashes.** No room, instructor or student group is in two classes at once. Back to back is fine, and the end must be after the start.
+- **No clashes.** Saving a class is refused when another class overlaps it in the same room, with the same instructor or for the same
+  student group. Back to back is fine, and the end must be after the start.
 - **Instructors and rooms.** Instructors have a name and email; rooms have a name and seats.
 
 ### ✅ Attendance
@@ -231,7 +234,7 @@ guardian sees their children on the workspace's portal.
 - **Right to left.** Pages mirror as they read.
 - **Assistant.** It knows the states and treats children's details carefully. It suggests "Which students have unpaid fees?", "Who was absent
   today?", "Which applicants are waiting for a decision?" and "What is on the timetable tomorrow?".
-- **Accessibility basics.** Skip links, labelled controls and a roll call built as a list of grouped choices.
+- **Accessibility basics.** Labelled controls and a roll call built as a list of grouped choices.
 
 ## 🧭 How it works
 
@@ -260,7 +263,7 @@ flowchart TD
   RC -->|publish| PUB["Published: the family sees it"]
 ```
 
-A class has a group, a course, an instructor and a room, with no double-booking. Attendance and results feed the year's report card.
+A class has a group, a course, an instructor and a room, and is refused when it overlaps another one's room, instructor or group. Attendance and results feed the year's report card.
 
 ## 🧱 Data model
 
@@ -341,7 +344,7 @@ at the K-12 level, with differences by product.
 ### 🏆 Where Education stands out
 
 - 💳 **The fee is an invoice in the school's books.** No separate finance system, no export.
-- 🗓️ **Clash-free timetable.** Enforced for room, instructor and group.
+- 🗓️ **A timetable that refuses clashes.** Checked for room, instructor and group when a class is saved.
 - 👨‍👩‍👧 **Consent that is kept as given.** Families give or withdraw consents on the portal and the office cannot rewrite them.
 - 🔏 **Children's data by rule.** Restricted fields and a personal-data erasure that keeps marks, fees and attendance.
 - 🔓 **Open and owned.** AGPL, self-hosted, no per-student price.

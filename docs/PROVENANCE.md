@@ -14,9 +14,7 @@
   - two rules: Course Schedule's check that a room, an instructor and a group are not double-booked,
     and the grading scale's highest-threshold band.
 - Not taken: academic terms, assessment criteria, the creation tools, the LMS parts (Learn has its own),
-  the website, and fee schedules.
-- Its own: admitting into a student and an enrollment in one step, invoicing fees to the guardian
-  through ERP, upkeep's payment check, and all the code.
-
-The copy read is in `ERP/referance/industry/erpnext-v13` on the machine this was written on (sparse:
-`erpnext/non_profit` and `erpnext/education`).
+  and the website.
+- Its own: admitting into a student and an enrollment in one step, fee schedules, report cards,
+  online applications, the family's portal, invoicing fees to the student's customer through ERP,
+  upkeep's payment check, and all the code.
