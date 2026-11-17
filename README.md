@@ -7,7 +7,7 @@
 
 <br>
 
-[![Version](https://img.shields.io/badge/version-0.4.5-1d4ed8?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.4.6-1d4ed8?style=flat-square)](CHANGELOG.md)
 [![Licence: AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-blue?style=flat-square)](LICENSE)
 [![Ferrum platform](https://img.shields.io/badge/runs%20on-Ferrum-2f5bea?style=flat-square)](https://github.com/CBFerrum/Ferrum)
 ![Rust](https://img.shields.io/badge/Rust-server-b7410e?style=flat-square&logo=rust)
@@ -47,7 +47,7 @@ are not.
 
 | | |
 |---|---|
-| **Version** | 0.4.5 |
+| **Version** | 0.4.6 |
 | **Kind** | Its own interface at `/school/` (today's classes, a class roll call, what waits on the office); the public application page; the family's portal page; every record in Ferrum's lists and forms |
 | **What it adds** | 26 record types (18 documents, 7 child tables, 1 settings record), 4 roles (one for the portal), 1 menu |
 | **Depends on** | Ferrum platform `>=0.3.2, <0.4`; ERP `>=0.28.3` (installing Education installs ERP) |
@@ -366,6 +366,7 @@ at the K-12 level, with differences by product.
 
 ### ✅ Recently shipped
 
+- [x] **0.4.6** An enrollment, a report card published and a fee's due date are on the workspace's day, not the UTC day.
 - [x] **0.4.5** One room, instructor or group, one class at a time: the database refuses a clash, so classes saved together cannot both be kept.
 - [x] **0.4.4** Rebuilt on Ferrum-Frontend 06bd1a2: the school's, the applying and the family's pages start through `mountApp`; no routes to the screens apps no longer have.
 - [x] **0.4.2** Tuned design system: better menu icons, lighter first page, cleaner print.

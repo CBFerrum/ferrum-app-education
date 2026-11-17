@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.6
+
+Server only. Needs the same platform as 0.4.5. No interface or database change.
+
+- **What happens today is dated on the workspace's day.** A student admitted was enrolled, and a report card published
+  was dated, on the UTC day, and fees invoiced kept their due date only if it was not before the UTC day. A workspace
+  east of UTC dated the first hours of its day on the day before, one west of UTC its evenings on the next day, and a
+  fee due that day could lose its due date. All are on the workspace's own day now.
+- `maintenance_on`, which took a day the upkeep never read, is gone: `maintenance` is the upkeep.
+
 ## 0.4.5
 
 Needs the same platform as 0.4.4. A database change: three exclusion constraints on the timetable (package SQL

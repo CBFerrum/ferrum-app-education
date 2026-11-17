@@ -20,7 +20,7 @@ mod records;
 mod site;
 mod timetable;
 
-use chrono::{NaiveDate, Utc};
+use chrono::NaiveDate;
 use ferrum_domain::reports::ReportSource;
 use ferrum_domain::util::s;
 use ferrum_kernel::{Doc, Error, HookRegistry, Kernel, Result};
@@ -66,11 +66,6 @@ pub fn reports() -> Vec<Arc<dyn ReportSource>> {
 
 /// Upkeep: fees whose invoices were settled are paid.
 pub async fn maintenance(k: &Kernel) -> Result<()> {
-    maintenance_on(k, Utc::now().date_naive()).await
-}
-
-/// [`maintenance`] as of `today`.
-pub async fn maintenance_on(k: &Kernel, today: NaiveDate) -> Result<()> {
     let mut tx = k.db.system_tx().await?;
     let tenants: Vec<Uuid> = sqlx::query_scalar("select id from tenant where status = 'active' order by id").fetch_all(&mut *tx).await?;
     tx.commit().await?;
@@ -78,7 +73,7 @@ pub async fn maintenance_on(k: &Kernel, today: NaiveDate) -> Result<()> {
     for tenant in tenants {
         match k.registry.schema(tenant).await {
             Ok(s) if s.packages.iter().any(|p| p == "education") => {
-                if let Err(e) = fees::upkeep(k, tenant, s, today).await {
+                if let Err(e) = fees::upkeep(k, tenant, s).await {
                     first_error.get_or_insert(e);
                 }
             }
