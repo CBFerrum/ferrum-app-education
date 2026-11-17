@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.5
+
+Needs the same platform as 0.4.4. A database change: three exclusion constraints on the timetable (package SQL
+`sql/001_education.sql`).
+
+- **One room, instructor or group, one class at a time, however many are saved at once.** The clash check read the
+  day's classes and then wrote, with nothing to stop two requests from both reading before either wrote: fifty classes
+  saved at once in one room at one time left three, for one instructor up to fifty, for one group up to fifty. The
+  database now refuses a room's, an instructor's or a group's overlapping classes on a day (half-open, so back to back
+  is still fine), so one is kept; the others are refused in the hook's words with the other class's times, or "the room
+  has another class then" (the instructor, the group).
+
 ## 0.4.4
 
 Needs the same platform as 0.4.3. No database change. Interface only, `ui/dist` rebuilt with Ferrum-Frontend `06bd1a2`.
