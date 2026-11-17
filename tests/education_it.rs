@@ -5,7 +5,6 @@
 //! timetable that refuses a room, an instructor or a group in two classes at once; attendance and a
 //! graded assessment; and who may do what.
 
-use chrono::NaiveDate;
 use ferrum_kernel::tenant::NewTenant;
 use ferrum_kernel::{Ctx, Db, DbConfig, Doc, Error, HookRegistry, Kernel, KernelSettings, ListQuery};
 use ferrum_meta::Catalog;
@@ -174,12 +173,12 @@ async fn scenario() {
     let customer = t.get("Customer", uid(&inv["customer"])).await;
     assert_eq!(customer["customer_name"], "Mira Rao", "the guardian is invoiced");
     assert_eq!(inv["items"].as_array().unwrap().len(), 2, "one line a component");
-    ferrum_app_education::maintenance_on(&k, NaiveDate::from_ymd_opt(2026, 7, 1).unwrap()).await.unwrap();
+    ferrum_app_education::maintenance(&k).await.unwrap();
     assert_eq!(t.get("Fees", fid).await["status"], "Invoiced", "not paid yet");
     t.k.submit(&a, "SalesInvoice", invoice, None).await.expect("submitted");
     let payment = t.k.run_action(&a, "SalesInvoice", invoice, "make_payment", Value::Null).await.expect("a payment");
     t.k.submit(&a, "PaymentEntry", uid(&payment["id"]), None).await.expect("paid");
-    ferrum_app_education::maintenance_on(&k, NaiveDate::from_ymd_opt(2026, 7, 2).unwrap()).await.unwrap();
+    ferrum_app_education::maintenance(&k).await.unwrap();
     assert_eq!(t.get("Fees", fid).await["status"], "Paid");
     refused(t.k.update(&manager, "Fees", fid, obj(json!({"fee_structure": Value::Null})), None).await, "invalid", "");
 
@@ -508,4 +507,18 @@ async fn scenario() {
     assert_eq!((trips["given"].as_bool(), trips["by"].as_str()), (Some(true), Some("mira@family.test")));
     refused(t.k.run_action(&mira_g, "Student", dev, "set_consent", consent("School Trips", "Given")).await, "not found", "");
     refused(t.k.run_action(&mira_g, "Student", ana, "set_consent", consent("Anything", "Given")).await, "invalid", "not one the school asks for");
+
+    // ───────────── the workspace's day, not UTC's ─────────────
+    // No clock can be set: as the platform's own suites do, the workspace moves to a zone whose day is not UTC's now
+    // (UTC-11 before 10:00 UTC, UTC+14 after), and a student admitted is enrolled on the workspace's day.
+    let zone = if chrono::Timelike::hour(&chrono::Utc::now()) < 10 { "Pacific/Pago_Pago" } else { "Pacific/Kiritimati" };
+    t.k.update_tenant_settings(&a, &obj(json!({"timezone": zone}))).await.expect("the workspace's zone");
+    let officer = t.k.load_ctx(t.tenant, officer.user, None, "it".into()).await.unwrap();
+    let today = officer.today();
+    assert_ne!(today, chrono::Utc::now().date_naive(), "{zone}'s day is not UTC's");
+    let eve = uid(&t.insert(&officer, "StudentApplicant", apply("Eve Park", "eve@school.test", None)).await["id"]);
+    t.k.run_action(&officer, "StudentApplicant", eve, "approve", Value::Null).await.unwrap();
+    let eve = t.k.run_action(&officer, "StudentApplicant", eve, "admit", Value::Null).await.unwrap()["student"]["id"].clone();
+    let enrolled = t.find_one("ProgramEnrollment", json!({"student": eve})).await;
+    assert_eq!(enrolled["enrolled_on"], json!(today.to_string()), "enrolled on the workspace's day");
 }

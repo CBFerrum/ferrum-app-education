@@ -4,7 +4,6 @@
 
 use crate::obj;
 use async_trait::async_trait;
-use chrono::NaiveDate;
 use ferrum_app_erp::portal;
 use ferrum_domain::flow::{create_for_user, created};
 use ferrum_domain::util::{d, elevated, id, money, rows, s, set, sys};
@@ -145,7 +144,7 @@ pub(crate) async fn invoice(hc: &mut HookCtx<'_>, doc: &Doc) -> Result<Value> {
     }
     let customer = customer_for(hc, &student).await?;
     // Fees invoiced after their due date are due at once: an invoice is not due before it is posted.
-    let due = crate::date(doc, "due_on").filter(|d| *d >= chrono::Utc::now().date_naive()).map(|d| d.to_string());
+    let due = crate::date(doc, "due_on").filter(|d| *d >= hc.ctx.today()).map(|d| d.to_string());
     let inv = create_for_user(
         hc,
         "SalesInvoice",
@@ -166,7 +165,7 @@ pub(crate) async fn invoice(hc: &mut HookCtx<'_>, doc: &Doc) -> Result<Value> {
 }
 
 /// One workspace's upkeep: fees whose invoices are submitted and settled are paid.
-pub(crate) async fn upkeep(k: &Kernel, tenant: Uuid, schema: Arc<Schema>, _today: NaiveDate) -> Result<()> {
+pub(crate) async fn upkeep(k: &Kernel, tenant: Uuid, schema: Arc<Schema>) -> Result<()> {
     let ctx = Ctx::system(tenant, schema);
     let mut tx = k.db.tenant_tx(tenant).await?;
     let paid: Vec<Uuid> = sqlx::query_scalar(

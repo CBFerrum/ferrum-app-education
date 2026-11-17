@@ -3,7 +3,6 @@
 
 use crate::obj;
 use async_trait::async_trait;
-use chrono::Utc;
 use ferrum_domain::flow::created;
 use ferrum_domain::util::{elevated, id, s};
 use ferrum_kernel::{Doc, DocHook, Error, HookCtx, Result};
@@ -53,7 +52,7 @@ impl DocHook for ApplicantHook {
                         &system,
                         hc.tx,
                         "ProgramEnrollment",
-                        obj(json!({"student": sid, "program": s(doc, "program"), "academic_year": s(doc, "academic_year"), "enrolled_on": Utc::now().date_naive().to_string()})),
+                        obj(json!({"student": sid, "program": s(doc, "program"), "academic_year": s(doc, "academic_year"), "enrolled_on": hc.ctx.today().to_string()})),
                     )
                     .await?;
                 hc.kernel.set_values_tx(&system, hc.tx, "StudentApplicant", applicant, obj(json!({"status": "Admitted", "student": sid}))).await?;

@@ -12,7 +12,6 @@ use crate::fees::invoice;
 use crate::marks::grade_of;
 use crate::obj;
 use async_trait::async_trait;
-use chrono::Utc;
 use ferrum_domain::util::{elevated, id, money, round, s, set, sys};
 use ferrum_kernel::{Doc, DocHook, Error, HookCtx, Result};
 use rust_decimal::Decimal;
@@ -230,7 +229,7 @@ impl DocHook for ReportCardHook {
         if fresh.get("courses").and_then(Value::as_array).is_none_or(Vec::is_empty) && fresh.get("classes").and_then(Value::as_i64).unwrap_or(0) == 0 {
             return Err(Error::invalid("it has no results or attendance to report yet"));
         }
-        let today = Utc::now().date_naive().to_string();
+        let today = hc.ctx.today().to_string();
         hc.kernel
             .set_values_tx(&elevated(hc.ctx), hc.tx, "ReportCard", me, obj(json!({"status": "Published", "published_by": hc.ctx.email, "published_on": today})))
             .await?;
