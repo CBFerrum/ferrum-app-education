@@ -7,13 +7,13 @@
 
 <br>
 
-[![Version](https://img.shields.io/badge/version-0.4.4-1d4ed8?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.4.5-1d4ed8?style=flat-square)](CHANGELOG.md)
 [![Licence: AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-blue?style=flat-square)](LICENSE)
 [![Ferrum platform](https://img.shields.io/badge/runs%20on-Ferrum-2f5bea?style=flat-square)](https://github.com/CBFerrum/Ferrum)
 ![Rust](https://img.shields.io/badge/Rust-server-b7410e?style=flat-square&logo=rust)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-data-336791?style=flat-square&logo=postgresql&logoColor=white)
 ![React](https://img.shields.io/badge/React%20%2B%20TypeScript-interface-087ea4?style=flat-square&logo=react&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-2%20Rust%20%2B%20UI%20suite-16a34a?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-3%20Rust%20%2B%20UI%20suite-16a34a?style=flat-square)
 
 ### A school's office in one place: admissions online, fees in the books, a timetable that refuses clashes, and a family portal.
 
@@ -35,7 +35,7 @@ are not.
 - 💳 **Fees in the school's own books.** Fees are invoiced through ERP as a draft Sales Invoice to the student's customer (the
   first guardian's, found or made through ERP), and marked paid once the invoice is.
 - 🗓️ **A timetable that refuses clashes.** A class that overlaps another in the same room, with the same instructor or for the same
-  student group is refused when it is saved.
+  student group is refused when it is saved, by the database too, so two saved at once cannot both be kept.
 - 👨‍👩‍👧 **A family portal.** Guardians see each child's enrollment, attendance, fees and published report cards, and give or withdraw
   the family's consents. Nobody else's children.
 - 🔏 **Children's data treated with care.** Dates of birth are in a restricted field group, and a personal-data request erases names,
@@ -47,13 +47,13 @@ are not.
 
 | | |
 |---|---|
-| **Version** | 0.4.4 |
+| **Version** | 0.4.5 |
 | **Kind** | Its own interface at `/school/` (today's classes, a class roll call, what waits on the office); the public application page; the family's portal page; every record in Ferrum's lists and forms |
 | **What it adds** | 26 record types (18 documents, 7 child tables, 1 settings record), 4 roles (one for the portal), 1 menu |
 | **Depends on** | Ferrum platform `>=0.3.2, <0.4`; ERP `>=0.28.3` (installing Education installs ERP) |
 | **Works with** | ERP (customers, items, companies, sales invoices); Learn (consent to share is recorded, nothing is sent yet) |
 | **Languages** | English, Arabic, Hindi (words and record names); right-to-left layout |
-| **Tests** | 2 Rust tests (one walks a term on PostgreSQL) and a UI suite |
+| **Tests** | 3 Rust tests (one walks a term on PostgreSQL, one saves a class fifty times at once) and a UI suite |
 | **Licence** | AGPL-3.0-only |
 
 ## 📸 Screenshots
@@ -173,7 +173,8 @@ are not.
 - **Groups.** A student group holds students enrolled in its program and year, each once.
 - **Classes.** A class is a group, a course, an instructor and a room at a time on a date, with times in `HH:MM`.
 - **No clashes.** Saving a class is refused when another class overlaps it in the same room, with the same instructor or for the same
-  student group. Back to back is fine, and the end must be after the start.
+  student group. Back to back is fine, and the end must be after the start. The database holds the same rule, so of two
+  classes saved at once in one room (or for one instructor or group) at one time, one is kept and the other is refused.
 - **Instructors and rooms.** Instructors have a name and email; rooms have a name and seats.
 
 ### ✅ Attendance
@@ -344,7 +345,7 @@ at the K-12 level, with differences by product.
 ### 🏆 Where Education stands out
 
 - 💳 **The fee is an invoice in the school's books.** No separate finance system, no export.
-- 🗓️ **A timetable that refuses clashes.** Checked for room, instructor and group when a class is saved.
+- 🗓️ **A timetable that refuses clashes.** Refused by the database for room, instructor and group, however many are saved at once.
 - 👨‍👩‍👧 **Consent that is kept as given.** Families give or withdraw consents on the portal and the office cannot rewrite them.
 - 🔏 **Children's data by rule.** Restricted fields and a personal-data erasure that keeps marks, fees and attendance.
 - 🔓 **Open and owned.** AGPL, self-hosted, no per-student price.
@@ -365,6 +366,7 @@ at the K-12 level, with differences by product.
 
 ### ✅ Recently shipped
 
+- [x] **0.4.5** One room, instructor or group, one class at a time: the database refuses a clash, so classes saved together cannot both be kept.
 - [x] **0.4.4** Rebuilt on Ferrum-Frontend 06bd1a2: the school's, the applying and the family's pages start through `mountApp`; no routes to the screens apps no longer have.
 - [x] **0.4.2** Tuned design system: better menu icons, lighter first page, cleaner print.
 - [x] **0.4.1** The redesigned interface with shaped loading and told-apart states.
@@ -427,7 +429,8 @@ FERRUM_EDUCATION_TEST_DATABASE_URL=postgres://ferrum:ferrum@localhost:5432/ferru
 
 The database must exist, be owned by a role that is not a superuser (superusers bypass row-level security) and be reset before the run.
 `tests/education_it.rs` walks a term: an admission and fees paid through ERP; groups and a timetable with each kind of clash refused;
-attendance and a graded assessment; and who may do what. Rust dependencies come from the Ferrum platform and Ferrum ERP repositories on `main`.
+attendance and a graded assessment; and who may do what. `tests/double_booking_it.rs` saves fifty classes at once in one room at one time,
+then for one instructor and for one group, each on its own connection: one class is kept each time. Rust dependencies come from the Ferrum platform and Ferrum ERP repositories on `main`.
 
 The interface lives in `ui/` and is built with Ferrum-Frontend. Check the Frontend out beside the repository as `../ferrum/web`, install its
 packages, then:
@@ -446,7 +449,7 @@ CI (`.github/workflows/ci.yml`) runs Rust on PostgreSQL 17 and the interface che
 
 ```text
 app.yaml                    manifest: id, roles, shell entries, public and portal pages, assistant notes
-packages/education/         entities, roles, field groups and personal-data rules as YAML
+packages/education/         entities, roles, field groups and personal-data rules as YAML; sql/ the database's guard against clashes
 src/admissions.rs           applicants: approve, reject, admit
 src/fees.rs                 fee structures, fees, invoices, paid status
 src/records.rs              fee schedules and report cards
@@ -455,6 +458,7 @@ src/marks.rs                results, percent and grade
 src/site.rs                 public applications and the family's portal endpoints
 ui/                         the home, roll call, application page and family page; words in Arabic and Hindi
 tests/education_it.rs       a term on PostgreSQL
+tests/double_booking_it.rs  one slot saved fifty times at once
 docs/PROVENANCE.md          where the design comes from
 ```
 

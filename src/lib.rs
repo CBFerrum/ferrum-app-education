@@ -39,8 +39,12 @@ pub fn packages() -> std::result::Result<Vec<ferrum_meta::Package>, ferrum_meta:
     ferrum_meta::catalog::load_embedded(EMBEDDED)
 }
 
-/// Registers this app's document hooks.
+/// Registers this app's document hooks, and the words for its timetable guard's refusals
+/// (packages/education/sql/001_education.sql).
 pub fn register(hooks: &mut HookRegistry) {
+    ferrum_kernel::error::set_constraint_message("education_room_free", "the room has another class then");
+    ferrum_kernel::error::set_constraint_message("education_instructor_free", "the instructor has another class then");
+    ferrum_kernel::error::set_constraint_message("education_group_free", "the group has another class then");
     hooks
         .register("StudentApplicant", Arc::new(admissions::ApplicantHook))
         .register("Student", Arc::new(site::StudentHook))

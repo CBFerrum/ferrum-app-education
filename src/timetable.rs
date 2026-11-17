@@ -43,6 +43,8 @@ impl DocHook for ScheduleHook {
             return Err(Error::field("to_time", "is after the start"));
         }
         let me = id(doc, "id").unwrap_or_else(Uuid::nil);
+        // The other class, to name its times. The database refuses the same clash by itself when two
+        // are saved at once (packages/education/sql/001_education.sql).
         for (field, what) in [("room", "room"), ("instructor", "instructor"), ("student_group", "group")] {
             let Some(target) = id(doc, field) else { continue };
             let sql = match field {
