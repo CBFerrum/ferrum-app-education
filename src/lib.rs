@@ -23,7 +23,7 @@ mod timetable;
 use chrono::NaiveDate;
 use ferrum_domain::reports::ReportSource;
 use ferrum_domain::util::s;
-use ferrum_kernel::{Doc, Error, HookRegistry, Kernel, Result};
+use ferrum_kernel::{Doc, HookRegistry, Kernel, Result};
 use serde_json::Value;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -64,26 +64,11 @@ pub fn reports() -> Vec<Arc<dyn ReportSource>> {
     vec![]
 }
 
-/// Upkeep: fees whose invoices were settled are paid.
-pub async fn maintenance(k: &Kernel) -> Result<()> {
-    let mut tx = k.db.system_tx().await?;
-    let tenants: Vec<Uuid> = sqlx::query_scalar("select id from tenant where status = 'active' order by id").fetch_all(&mut *tx).await?;
-    tx.commit().await?;
-    let mut first_error: Option<Error> = None;
-    for tenant in tenants {
-        match k.registry.schema(tenant).await {
-            Ok(s) if s.packages.iter().any(|p| p == "education") => {
-                if let Err(e) = fees::upkeep(k, tenant, s).await {
-                    first_error.get_or_insert(e);
-                }
-            }
-            Ok(_) => {}
-            Err(e) => {
-                first_error.get_or_insert(e);
-            }
-        }
-    }
-    first_error.map_or(Ok(()), Err)
+/// One workspace's upkeep, which the platform runs about once a minute where Education is installed, on whichever
+/// replica is free, and may run again: fees whose invoices were settled are paid.
+pub async fn maintenance(k: &Kernel, tenant: Uuid) -> Result<()> {
+    let schema = k.registry.schema(tenant).await?;
+    fees::upkeep(k, tenant, schema).await
 }
 
 /// A date field.

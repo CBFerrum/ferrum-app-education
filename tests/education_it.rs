@@ -80,7 +80,6 @@ async fn scenario() {
     ferrum_app_education::register(&mut hooks);
     let k = Kernel::boot(db, catalog, hooks, KernelSettings::default(), None).await.expect("boot");
     ferrum_domain::maintenance(&k).await.expect("partitions");
-    ferrum_app_erp::maintenance(&k).await.expect("partitions");
     let tenant = k
         .create_tenant(NewTenant {
             slug: "school".into(),
@@ -173,12 +172,12 @@ async fn scenario() {
     let customer = t.get("Customer", uid(&inv["customer"])).await;
     assert_eq!(customer["customer_name"], "Mira Rao", "the guardian is invoiced");
     assert_eq!(inv["items"].as_array().unwrap().len(), 2, "one line a component");
-    ferrum_app_education::maintenance(&k).await.unwrap();
+    ferrum_app_education::maintenance(&k, t.tenant).await.unwrap();
     assert_eq!(t.get("Fees", fid).await["status"], "Invoiced", "not paid yet");
     t.k.submit(&a, "SalesInvoice", invoice, None).await.expect("submitted");
     let payment = t.k.run_action(&a, "SalesInvoice", invoice, "make_payment", Value::Null).await.expect("a payment");
     t.k.submit(&a, "PaymentEntry", uid(&payment["id"]), None).await.expect("paid");
-    ferrum_app_education::maintenance(&k).await.unwrap();
+    ferrum_app_education::maintenance(&k, t.tenant).await.unwrap();
     assert_eq!(t.get("Fees", fid).await["status"], "Paid");
     refused(t.k.update(&manager, "Fees", fid, obj(json!({"fee_structure": Value::Null})), None).await, "invalid", "");
 
